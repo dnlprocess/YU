@@ -1,16 +1,11 @@
 package edu.yu.cs.com1320.project.stage1;
 
-import edu.yu.cs.com1320.project.impl.HashTableImpl;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
 public interface DocumentStore
 {
-
-    HashTableImpl<Key, Value> docStore;
-
     /**
      * the two document formats supported by this document store.
      * Note that TXT means plain text, i.e. a String.
