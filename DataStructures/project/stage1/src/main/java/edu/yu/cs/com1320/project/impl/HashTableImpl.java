@@ -6,7 +6,7 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
 
     private int size = 5;
 
-    class Pair<Key, Value>{
+    private class Pair<Key, Value>{
         final Key key;
         Value value;
         Pair(Key k, Value v){  //constructor for Entry
@@ -15,10 +15,10 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
         }
     }
     
-    private Pair<?,?>[][] hashTable;
+    private Pair<Key,Value>[][] hashTable;
 
     public HashTableImpl() {
-        this.hashTable = new Pair[this.size][];
+        this.hashTable = new Pair[this.size][1];
     }
 
     /**
@@ -44,26 +44,47 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
         if (key == null) {
             throw new NullPointerException();
         }
-
+        return (this.get(key) != null) ? true : false;
     }
 
     /**
      * @param k the key at which to store the value
      * @param v the value to store.
      * To delete an entry, put a null value.
-     * @return if the key was already present in the HashTable, return the previous value stored for the key. If the key was not already present, return null.
+     * @return if the key was already present in the HashTable, return the previous value stored for the key.
+     * If the key was not already present, return null.
      */
     public Value put(Key k, Value v) {
+        Pair<Key, Value> newPair = new Pair<Key, Value>(k, v);
+        int index = this.hashIndex(k);
         Value pastValue = null;
-        if (this.get(k) != null) {
-            // = k
-            
+        
+        int i;
+        for (i=0; i < this.hashTable[index].length && this.hashTable[index][i] != null; i++) {
+            if (this.hashTable[index][i].key.equals(k)) {
+                pastValue = this.hashTable[index][i].value;
+                this.hashTable[index][i] = newPair;
+                return pastValue;
+            }
         }
-        this.get(k);
+
+        if (i < this.hashTable[index].length) {
+            doubleIndex(index);
+        }
+        this.hashTable[index][i+1] = newPair;
         return pastValue;
     }
 
     private int hashIndex(Key key){
         return (key.hashCode() & 0x7fffffff) % this.size;
         }
+
+    private void doubleIndex(int index) {
+        int length = 2*this.hashTable[index].length;
+        Pair<Key, Value>[] arr = new Pair[length];
+        for (int i=0; i< this.hashTable[index].length; i++) {
+            arr[i] = this.hashTable[index][i];
+        }
+        this.hashTable[index] = arr;
+    }
 }
