@@ -3,17 +3,12 @@ package edu.yu.cs.com1320.project.stage1.impl;
 import edu.yu.cs.com1320.project.stage1.DocumentStore;
 import edu.yu.cs.com1320.project.stage1.Document;
 import edu.yu.cs.com1320.project.impl.HashTableImpl;
-import edu.yu.cs.com1320.project.stage1.impl.DocumentImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-public class DocumentStoreImpl {
-
-    enum DocumentFormat{
-        TXT,BINARY
-    }
+public class DocumentStoreImpl implements DocumentStore{
 
     HashTableImpl<URI, Document> docStore;
 
@@ -28,26 +23,26 @@ public class DocumentStoreImpl {
      * @throws IOException if there is an issue reading input
      * @throws IllegalArgumentException if uri or format are null
      */
-    int put(InputStream input, URI uri, DocumentFormat format) throws IOException {
+    public int put(InputStream input, URI uri, DocumentFormat format) throws IOException {
         if (uri == null || format == null) {
             throw new IllegalArgumentException();
         }
 
-        this.docStore.get(uri);
-        
-        DocumentImpl doc = DocumentImpl(uri, input.readAllBytes());//format.equals("BINARY") ? DocumentImpl(uri, input.readAllBytes()): DocumentImpl(uri, input);
+        Document doc = (Document) new DocumentImpl(uri, input.readAllBytes());//format.equals("BINARY") ? DocumentImpl(uri, input.readAllBytes()): DocumentImpl(uri, input);
 
-
-        if () {
+        if (!this.docStore.containsKey(uri)) {
             return 0;
         }
+        
+        return this.docStore.put(uri, doc).hashCode();
+    
     }
 
     /**
      * @param uri the unique identifier of the document to get
      * @return the given document
      */
-    Document get(URI uri) {
+    public Document get(URI uri) {
         return this.docStore.get(uri);
     }
 
@@ -55,7 +50,7 @@ public class DocumentStoreImpl {
      * @param uri the unique identifier of the document to delete
      * @return true if the document is deleted, false if no document exists with that URI
      */
-    boolean delete(URI uri) {
+    public boolean delete(URI uri) {
         if (this.docStore.containsKey(uri)) {
             this.docStore.put(uri, null);
             return true;

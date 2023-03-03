@@ -22,7 +22,7 @@ public class DocumentImpl {
 
     public DocumentImpl(URI uri, String txt) {
         testURI(uri);
-        if (txt == null || txt.equals("")) {
+        if (txt == null || txt.isEmpty()) {
             throw new IllegalArgumentException();
         }
         this.uri = uri;
@@ -33,21 +33,21 @@ public class DocumentImpl {
     /**
      * @return content of text document
      */
-    String getDocumentTxt() {
+    public String getDocumentTxt() {
         return this.text;
     }
 
     /**
      * @return content of binary data document
      */
-    byte[] getDocumentBinaryData() {
+    public byte[] getDocumentBinaryData() {
         return this.binaryData;
     }
 
     /**
      * @return URI which uniquely identifies this document
      */
-    URI getKey() {
+    public URI getKey() {
         return this.uri;
     }
 

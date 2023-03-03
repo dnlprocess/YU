@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: HashTableImplTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.116 s <<< FAILURE! - in HashTableImplTest
+testPutAndGetWithNullValue(HashTableImplTest)  Time elapsed: 0.009 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read field "value" because "current" is null
+	at HashTableImplTest.testPutAndGetWithNullValue(HashTableImplTest.java:27)
+
+testDeleteNonExistingKey(HashTableImplTest)  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read field "value" because "current" is null
+	at HashTableImplTest.testDeleteNonExistingKey(HashTableImplTest.java:52)
+
+testDelete(HashTableImplTest)  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read field "key" because "current.next" is null
+	at HashTableImplTest.testDelete(HashTableImplTest.java:45)
+
