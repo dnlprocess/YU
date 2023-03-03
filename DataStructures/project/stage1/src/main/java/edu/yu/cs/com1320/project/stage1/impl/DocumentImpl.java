@@ -4,7 +4,7 @@ import edu.yu.cs.com1320.project.stage1.Document;
 import java.util.Arrays;
 import java.net.URI;
 
-public class DocumentImpl {
+public class DocumentImpl implements Document{
 
     private URI uri;
     private String text;
