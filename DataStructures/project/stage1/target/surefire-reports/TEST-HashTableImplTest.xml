@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="HashTableImplTest" time="0.116" tests="6" errors="3" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="HashTableImplTest" time="0.097" tests="6" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="19"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/local/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire/surefirebooter16548340666178173769.jar /Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire 2023-03-02T21-32-03_988-jvmRun1 surefire8425657625746834296tmp surefire_01404326398506838473tmp"/>
+    <property name="sun.java.command" value="/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire/surefirebooter15268751428845080503.jar /Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire 2023-03-02T21-51-20_004-jvmRun1 surefire2896919339301486341tmp surefire_06303826479656505700tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/test-classes:/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/classes:/Users/daniellipshitz/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/daniellipshitz/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -28,7 +28,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire/surefirebooter16548340666178173769.jar"/>
+    <property name="surefire.real.class.path" value="/Users/daniellipshitz/Documents/Academic/College Freshman/Data Structures/Daniel_Lipshitz_800509988/DataStructures/project/stage1/target/surefire/surefirebooter15268751428845080503.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="19.0.2"/>
     <property name="user.name" value="daniel_lipshitz"/>
@@ -55,22 +55,10 @@
     <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
     <property name="java.class.version" value="63.0"/>
   </properties>
-  <testcase name="testPutAndGetWithNullValue" classname="HashTableImplTest" time="0.009">
-    <error message="Cannot read field &quot;value&quot; because &quot;current&quot; is null" type="java.lang.NullPointerException">java.lang.NullPointerException: Cannot read field "value" because "current" is null
-	at HashTableImplTest.testPutAndGetWithNullValue(HashTableImplTest.java:27)
-</error>
-  </testcase>
+  <testcase name="testPutAndGetWithNullValue" classname="HashTableImplTest" time="0.006"/>
   <testcase name="testContainsKey" classname="HashTableImplTest" time="0.001"/>
-  <testcase name="testPutAndGet" classname="HashTableImplTest" time="0"/>
-  <testcase name="testDeleteNonExistingKey" classname="HashTableImplTest" time="0.001">
-    <error message="Cannot read field &quot;value&quot; because &quot;current&quot; is null" type="java.lang.NullPointerException">java.lang.NullPointerException: Cannot read field "value" because "current" is null
-	at HashTableImplTest.testDeleteNonExistingKey(HashTableImplTest.java:52)
-</error>
-  </testcase>
-  <testcase name="testDelete" classname="HashTableImplTest" time="0.001">
-    <error message="Cannot read field &quot;key&quot; because &quot;current.next&quot; is null" type="java.lang.NullPointerException">java.lang.NullPointerException: Cannot read field "key" because "current.next" is null
-	at HashTableImplTest.testDelete(HashTableImplTest.java:45)
-</error>
-  </testcase>
-  <testcase name="testPutAndGetWithCollisions" classname="HashTableImplTest" time="0"/>
+  <testcase name="testPutAndGet" classname="HashTableImplTest" time="0.001"/>
+  <testcase name="testDeleteNonExistingKey" classname="HashTableImplTest" time="0"/>
+  <testcase name="testDelete" classname="HashTableImplTest" time="0"/>
+  <testcase name="testPutAndGetWithCollisions" classname="HashTableImplTest" time="0.001"/>
 </testsuite>

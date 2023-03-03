@@ -50,19 +50,23 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
         }
 
         Value delete(Key key) {
-            Value pastValue = null;
-            Pair current = this.head;
-            Pair previous = this.head;
-            while(current != null && !current.next.key.equals(key)){
-                previous = current;
-                current = current.next;
+            return deleteHelper(this.head, key);
+        }
+        
+        private Value deleteHelper(Pair current, Key key) {
+            if (current == null) {
+                return null;
             }
-            pastValue = current.value;
-            if(current.next != null){
+            
+            if (current.key.equals(key)) {
+                Value pastValue = current.value;
+                this.head = current.next;
+                return pastValue;
+            }
+            
+            Value pastValue = deleteHelper(current.next, key);
+            if (pastValue != null) {
                 current.next = current.next.next;
-            }
-            else {
-                previous.next = previous.next.next;
             }
             return pastValue;
         }
