@@ -12,6 +12,10 @@ public class DocumentStoreImpl implements DocumentStore{
 
     HashTableImpl<URI, Document> docStore;
 
+    public DocumentStoreImpl() {
+        this.docStore = new HashTableImpl<URI, Document>();
+    }
+
     /**
      * @param input the document being put
      * @param uri unique identifier for the document
