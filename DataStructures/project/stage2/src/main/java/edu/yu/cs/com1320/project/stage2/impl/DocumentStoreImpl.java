@@ -1,5 +1,3 @@
-//recent
-
 package edu.yu.cs.com1320.project.stage2.impl;
 
 import edu.yu.cs.com1320.project.stage2.DocumentStore;
@@ -19,11 +17,12 @@ public class DocumentStoreImpl implements DocumentStore{
 
 
     private HashTableImpl<URI, Document> docStore;
+    private HashTableImpl<URI, Document> storage;
     private StackImpl<Command> commandStack;
-    private Document tempDoc;
 
     public DocumentStoreImpl() {
         this.docStore = new HashTableImpl<URI, Document>();
+        this.storage = new HashTableImpl<URI, Document>();
         this.commandStack = new StackImpl<Command>();
     }
 
@@ -51,18 +50,16 @@ public class DocumentStoreImpl implements DocumentStore{
             throw new IllegalArgumentException();
         }
 
-        Document doc = input == null? null: format.equals(DocumentFormat.BINARY)? (Document) new DocumentImpl(uri, input.readAllBytes()): (Document) new DocumentImpl(uri, String(input.readAllBytes(), StandardCharsets.UTF_8));
+        Document doc = input == null? null: format.equals(DocumentFormat.BINARY)? (Document) new DocumentImpl(uri, input.readAllBytes()): (Document) new DocumentImpl(uri, toTXT(input));
+        this.storage.put(uri, doc);
 
-        this.tempDoc = this.docStore.get(uri);
-        addCommand(uri);//fix something about it not being in there
+        addDelete(uri);//fix something about it not being in there
 
         if (!this.docStore.containsKey(uri)) {
             this.docStore.put(uri, doc);
             return 0;
         }
 
-        return this.docStore.put(uri, doc).hashCode();
-        
         return input == null? this.docStore.put(uri, null).hashCode() : this.docStore.put(uri, doc).hashCode();
     
     }
@@ -76,8 +73,7 @@ public class DocumentStoreImpl implements DocumentStore{
             return false;
         }
 
-        this.tempDoc = this.docStore.get(uri);
-        addPutCommand(uri);
+        addPut(uri);
 
         this.docStore.put(uri, null);
 
@@ -118,10 +114,9 @@ public class DocumentStoreImpl implements DocumentStore{
         this.commandStack = tempStack;
     }
 
-    private void addCommand(URI uri1) {
-
+    private void addPut(URI uri1) {
         Function<URI, Boolean> undo = uri -> {
-            Document doc = this.tempDoc;
+            Document doc = this.storage.get(uri1);
             return this.docStore.put(uri, doc) == null? false: true;
         };
 
@@ -129,8 +124,24 @@ public class DocumentStoreImpl implements DocumentStore{
         this.commandStack.push(newCommand);
     }
 
+    private void addDelete(URI uri1) {
+        Function<URI, Boolean> undo = uri -> {
+            return this.docStore.put(uri, null) == null? false: true;
+        };
+
+        Command newCommand = new Command(uri1, undo);
+        this.commandStack.push(newCommand);
+    }
+
     private String toTXT(InputStream input) throws IOException {
-        Scanner scanner = new Scanner(input).useDelimiter("\\A");
-        return scanner.hasNext() ? scanner.next() : "";
+        String s = "";
+        try (Scanner scanner = new Scanner(input).useDelimiter("\\A")) {
+            if (scanner.hasNext()) {
+                s = scanner.next();
+            }
+            scanner.close();
+        }
+        
+        return s;
     }
 }
