@@ -27,8 +27,10 @@ public class StackImpl<T> implements Stack<T> {
      * @param element object to add to the Stack
      */
     public void push(T element) {
-        Node<T> newNode = new Node<T>(element, this.top);
-        this.top = newNode;
+        if (!(element == null)) {
+            Node<T> newNode = new Node<T>(element, this.top);
+            this.top = newNode;
+        }
     }
 
     /**

@@ -34,4 +34,17 @@ public interface DocumentStore
      * @return true if the document is deleted, false if no document exists with that URI
      */
     boolean delete(URI uri);
+
+    /**
+     * undo the last put or delete command
+     * @throws IllegalStateException if there are no actions to be undone, i.e. the command stack is empty
+     */
+    void undo() throws IllegalStateException;
+
+    /**
+     * undo the last put or delete that was done with the given URI as its key
+     * @param uri
+     * @throws IllegalStateException if there are no actions on the command stack for the given URI
+     */
+    void undo(URI uri) throws IllegalStateException;
 }

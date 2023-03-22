@@ -4,11 +4,13 @@ package edu.yu.cs.com1320.project.stage2.impl;
 
 import edu.yu.cs.com1320.project.stage2.DocumentStore;
 import edu.yu.cs.com1320.project.stage2.Document;
+import edu.yu.cs.com1320.project.stage2.impl.DocumentImpl;
 import edu.yu.cs.com1320.project.Command;
 import edu.yu.cs.com1320.project.impl.HashTableImpl;
 import edu.yu.cs.com1320.project.impl.StackImpl;
 
 import java.io.IOException;
+import java.util.Scanner;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.function.Function;
@@ -16,8 +18,9 @@ import java.util.function.Function;
 public class DocumentStoreImpl implements DocumentStore{
 
 
-    HashTableImpl<URI, Document> docStore;
-    StackImpl<Command> commandStack;
+    private HashTableImpl<URI, Document> docStore;
+    private StackImpl<Command> commandStack;
+    private Document tempDoc;
 
     public DocumentStoreImpl() {
         this.docStore = new HashTableImpl<URI, Document>();
@@ -48,15 +51,19 @@ public class DocumentStoreImpl implements DocumentStore{
             throw new IllegalArgumentException();
         }
 
-        //add command
+        Document doc = input == null? null: format.equals(DocumentFormat.BINARY)? (Document) new DocumentImpl(uri, input.readAllBytes()): (Document) new DocumentImpl(uri, String(input.readAllBytes(), StandardCharsets.UTF_8));
 
-        Document doc = (Document) new DocumentImpl(uri, input.readAllBytes());//format.equals("BINARY") ? DocumentImpl(uri, input.readAllBytes()): DocumentImpl(uri, input);
+        this.tempDoc = this.docStore.get(uri);
+        addCommand(uri);//fix something about it not being in there
 
         if (!this.docStore.containsKey(uri)) {
+            this.docStore.put(uri, doc);
             return 0;
         }
-        
+
         return this.docStore.put(uri, doc).hashCode();
+        
+        return input == null? this.docStore.put(uri, null).hashCode() : this.docStore.put(uri, doc).hashCode();
     
     }
 
@@ -68,9 +75,11 @@ public class DocumentStoreImpl implements DocumentStore{
         if (!this.docStore.containsKey(uri)) {
             return false;
         }
-        this.docStore.put(uri, null);
 
-        //add command
+        this.tempDoc = this.docStore.get(uri);
+        addPutCommand(uri);
+
+        this.docStore.put(uri, null);
 
         return true;
     }
@@ -80,8 +89,11 @@ public class DocumentStoreImpl implements DocumentStore{
      * @throws IllegalStateException if there are no actions to be undone, i.e. the command stack is empty
      */
     public void undo() throws IllegalStateException {
-        this.commandStack.peek().undo();
-        this.commandStack.pop();
+        if (this.commandStack.size() == 0) {
+            throw new IllegalStateException();
+        }
+        
+        this.commandStack.pop().undo();
     }
 
     /**
@@ -89,25 +101,36 @@ public class DocumentStoreImpl implements DocumentStore{
      * @param uri
      * @throws IllegalStateException if there are no actions on the command stack for the given URI
      */
-    void undo(URI uri) throws IllegalStateException {
+    public void undo(URI uri) throws IllegalStateException {
         StackImpl<Command> tempStack = new StackImpl<Command>();
         for (int i=0; i<this.commandStack.size(); i++) {
             if (this.commandStack.peek().getUri() == uri){
-                this.commandStack.peek().undo();
-                this.commandStack.pop();
+                this.commandStack.pop().undo();
             }
             else {
                 tempStack.push(this.commandStack.pop());
             }
         }
+        if (tempStack.size() == this.commandStack.size()) {
+            throw new IllegalStateException();
+        }
+
+        this.commandStack = tempStack;
     }
 
-    void addCommand() {
-        Function<URI, Boolean> undo = () -> {};
+    private void addCommand(URI uri1) {
 
+        Function<URI, Boolean> undo = uri -> {
+            Document doc = this.tempDoc;
+            return this.docStore.put(uri, doc) == null? false: true;
+        };
 
-
-        Command newCommand = new Command(uri, );
+        Command newCommand = new Command(uri1, undo);
         this.commandStack.push(newCommand);
+    }
+
+    private String toTXT(InputStream input) throws IOException {
+        Scanner scanner = new Scanner(input).useDelimiter("\\A");
+        return scanner.hasNext() ? scanner.next() : "";
     }
 }
