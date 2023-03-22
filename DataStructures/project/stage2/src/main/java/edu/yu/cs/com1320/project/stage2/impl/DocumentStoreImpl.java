@@ -15,14 +15,22 @@ import java.util.function.Function;
 
 public class DocumentStoreImpl implements DocumentStore{
 
+    private class Entry<URI, Document> {
+        URI uri;
+        Document doc;
+        Entry(URI uri, Document doc) {
+            this.uri = uri;
+            this.doc = doc;
+        }
+    }
 
     private HashTableImpl<URI, Document> docStore;
-    private HashTableImpl<URI, Document> storage;
+    private StackImpl<Entry<URI, Document>> storage;
     private StackImpl<Command> commandStack;
 
     public DocumentStoreImpl() {
         this.docStore = new HashTableImpl<URI, Document>();
-        this.storage = new HashTableImpl<URI, Document>();
+        this.storage = new StackImpl<Entry<URI, Document>>();
         this.commandStack = new StackImpl<Command>();
     }
 
@@ -51,7 +59,6 @@ public class DocumentStoreImpl implements DocumentStore{
         }
 
         Document doc = input == null? null: format.equals(DocumentFormat.BINARY)? (Document) new DocumentImpl(uri, input.readAllBytes()): (Document) new DocumentImpl(uri, toTXT(input));
-        this.storage.put(uri, doc);
 
         addDelete(uri);//fix something about it not being in there
 
@@ -73,9 +80,11 @@ public class DocumentStoreImpl implements DocumentStore{
             return false;
         }
 
-        addPut(uri);
-
+        Entry<URI, Document> entry = new Entry<URI, Document>(uri, this.docStore.get(uri));
+        this.storage.push(entry);
         this.docStore.put(uri, null);
+
+        addPut(uri);
 
         return true;
     }
@@ -99,24 +108,39 @@ public class DocumentStoreImpl implements DocumentStore{
      */
     public void undo(URI uri) throws IllegalStateException {
         StackImpl<Command> tempStack = new StackImpl<Command>();
+        Command command = null;
         for (int i=0; i<this.commandStack.size(); i++) {
             if (this.commandStack.peek().getUri() == uri){
-                this.commandStack.pop().undo();
+                command = this.commandStack.pop();
+                break;
             }
-            else {
-                tempStack.push(this.commandStack.pop());
-            }
-        }
-        if (tempStack.size() == this.commandStack.size()) {
-            throw new IllegalStateException();
+            tempStack.push(this.commandStack.pop());
         }
 
-        this.commandStack = tempStack;
+        if (command == null) {
+            throw new IllegalStateException();
+        }
+        command.undo();
+
+        for (int i=0; i<tempStack.size(); i++) {
+            this.commandStack.push(tempStack.pop());
+        }
     }
 
     private void addPut(URI uri1) {
         Function<URI, Boolean> undo = uri -> {
-            Document doc = this.storage.get(uri1);
+            StackImpl<Entry<URI, Document>> tempStack = new StackImpl<Entry<URI, Document>>();
+            Document doc = null;
+            for (int i=0; i<storage.size(); i++) {
+                if (storage.peek().uri.equals(uri)) {
+                    doc = storage.pop().doc;
+                    break;
+                }
+                tempStack.push(storage.pop());
+            }
+            for (int i=0; i<tempStack.size(); i++){
+                this.storage.push(tempStack.pop());
+            }
             return this.docStore.put(uri, doc) == null? false: true;
         };
 
