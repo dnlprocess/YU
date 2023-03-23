@@ -60,7 +60,9 @@ public class DocumentStoreImpl implements DocumentStore{
 
         Document doc = input == null? null: format.equals(DocumentFormat.BINARY)? (Document) new DocumentImpl(uri, input.readAllBytes()): (Document) new DocumentImpl(uri, toTXT(input));
 
-        addDelete(uri);//fix something about it not being in there
+        Entry<URI, Document> entry = new Entry<URI, Document>(uri, this.docStore.get(uri));
+        this.storage.push(entry);
+        addCommand(uri);
 
         if (!this.docStore.containsKey(uri)) {
             this.docStore.put(uri, doc);
@@ -84,7 +86,7 @@ public class DocumentStoreImpl implements DocumentStore{
         this.storage.push(entry);
         this.docStore.put(uri, null);
 
-        addPut(uri);
+        addCommand(uri);
 
         return true;
     }
@@ -127,7 +129,7 @@ public class DocumentStoreImpl implements DocumentStore{
         }
     }
 
-    private void addPut(URI uri1) {
+    private void addCommand(URI uri1) {
         Function<URI, Boolean> undo = uri -> {
             StackImpl<Entry<URI, Document>> tempStack = new StackImpl<Entry<URI, Document>>();
             Document doc = null;
@@ -142,15 +144,6 @@ public class DocumentStoreImpl implements DocumentStore{
                 this.storage.push(tempStack.pop());
             }
             return this.docStore.put(uri, doc) == null? false: true;
-        };
-
-        Command newCommand = new Command(uri1, undo);
-        this.commandStack.push(newCommand);
-    }
-
-    private void addDelete(URI uri1) {
-        Function<URI, Boolean> undo = uri -> {
-            return this.docStore.put(uri, null) == null? false: true;
         };
 
         Command newCommand = new Command(uri1, undo);

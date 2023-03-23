@@ -27,17 +27,17 @@ public class StackImplTest {
 
     @Test
     public void testPeek() {
-        StackImpl<Integer> stack = new StackImpl<>();
+        StackImpl<String> stack = new StackImpl<String>();
         assertNull(stack.peek());
 
-        stack.push(1);
-        assertEquals(Integer.valueOf(1), stack.peek());
+        stack.push("a");
+        assertEquals("a", stack.peek());
 
-        stack.push(2);
-        assertEquals(Integer.valueOf(2), stack.peek());
+        stack.push("b");
+        assertEquals("b", stack.peek());
 
-        stack.pop();
-        assertEquals(Integer.valueOf(1), stack.peek());
+        assertEquals("b", stack.pop());
+        assertEquals("a", stack.peek());
 
         stack.pop();
         assertNull(stack.peek());
@@ -45,13 +45,13 @@ public class StackImplTest {
 
     @Test
     public void testSize() {
-        StackImpl<Double> stack = new StackImpl<>();
+        StackImpl<Integer> stack = new StackImpl<Integer>();
         assertTrue(stack.size() == 0);
 
-        stack.push(1.0);
+        stack.push(1);
         assertTrue(stack.size() == 1);
 
-        stack.push(2.0);
+        stack.push(2);
         assertTrue(stack.size() == 2);
 
         stack.pop();
