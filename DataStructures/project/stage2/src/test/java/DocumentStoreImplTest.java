@@ -38,13 +38,15 @@ public class DocumentStoreImplTest {
 
         docStore.undo();
         assertEquals(doc1, docStore.get(uri));
+        docStore.undo();
+        assertEquals(null, docStore.get(uri));
     }
     
     /*
     @Test
     public void testPutBinaryDocumentNoPreviousDocAtURI() throws IOException {
         DocumentStoreImpl store = new DocumentStoreImpl();
-        URI uri = URI.create("http://www.yu.edu/doc1");
+        URI uri = URI.create("http://www.example.com");
         byte[] data = {1,2,3,4,5};
         InputStream stream = new ByteArrayInputStream(data);
         assertEquals(0, store.put(stream, uri, DocumentFormat.BINARY));
@@ -69,6 +71,8 @@ public class DocumentStoreImplTest {
         String text2 = "new text";
         InputStream stream1 = new ByteArrayInputStream(text1.getBytes());
         InputStream stream2 = new ByteArrayInputStream(text2.getBytes());
+        Document doc1 = new DocumentImpl(uri, text1);
+        Document doc2 = new DocumentImpl(uri, text1);
         assertEquals(0, store.put(stream1, uri, DocumentFormat.TXT));
         assertEquals(text1, store.get(uri));
         assertEquals(text1.hashCode(), store.put(stream2, uri, DocumentFormat.TXT));

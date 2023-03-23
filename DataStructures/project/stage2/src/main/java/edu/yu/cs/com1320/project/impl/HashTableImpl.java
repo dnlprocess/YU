@@ -4,6 +4,7 @@ import edu.yu.cs.com1320.project.HashTable;
 
 public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
 
+    //public int pairs;
     private int pairs;
 
     private class Entry<Key, Value> {
@@ -138,16 +139,20 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
         Entry<Key, Value>[] tempHashTable = this.hashTable;
         
         this.hashTable = (Entry<Key, Value>[]) new Entry[2*this.hashTable.length];
-        for (int i=0; i < 2*this.hashTable.length; i++) {
+        for (int i=0; i < this.hashTable.length; i++) {
             this.hashTable[i] = new Entry<Key, Value>();
         }
 
-        for (int i=0; i < this.hashTable.length;i++) {
+        for (int i=0; i < tempHashTable.length;i++) {
             Entry<Key, Value> current = tempHashTable[i];
-            while(current != null) {
+            while(current.head != null) {
                 this.hashTable[hashIndex(current.getKey())].put(current.getKey(), current.get(current.getKey()));
                 current.delete(current.getKey());
             }
         }
     }
+
+    //public int size() {
+    //    return this.hashTable.length;
+    //}
 }
