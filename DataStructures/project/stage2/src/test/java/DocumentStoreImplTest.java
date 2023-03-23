@@ -35,6 +35,9 @@ public class DocumentStoreImplTest {
         Document doc2 = new DocumentImpl(uri, bytes2);
         assertEquals(doc1.hashCode(), docStore.put(stream2, uri, DocumentFormat.BINARY));
         assertEquals(doc2, docStore.get(uri));
+
+        docStore.undo();
+        assertEquals(doc1, docStore.get(uri));
     }
     
     /*
