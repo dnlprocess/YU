@@ -192,7 +192,7 @@ public class DocumentStoreImpl implements DocumentStore{
                 this.archive.push(tempArchive.pop());
             }
 
-            this.docStore.put(doc.getKey(), doc);
+            this.docStore.put(uri, doc);
             putDocTrie(doc);
             return true;
         };

@@ -143,11 +143,16 @@ public class DocumentStoreImplTest {
         assertEquals(6, docs.size());
         assertEquals(doc1, store.get(uri1));
         assertEquals(doc1.getWords(), store.get(uri1).getWords());
+        
         store.deleteAllWithPrefix("t");
-        docs = store.searchByPrefix("t");
-        assertEquals(0, docs.size());
+            docs = store.searchByPrefix("t");
+            assertEquals(0, docs.size());
+        store.undo();
+            docs = store.searchByPrefix("t");
+            assertEquals(6, docs.size());
+
         store.undo();
         docs = store.searchByPrefix("t");
-        assertEquals(6, docs.size());
+        assertEquals(4, docs.size());
     }
 }
