@@ -12,12 +12,12 @@ import java.net.URI;
 
 import org.junit.Test;
 
-import edu.yu.cs.com1320.project.stage2.DocumentStore;
-import edu.yu.cs.com1320.project.stage2.Document;
-import edu.yu.cs.com1320.project.stage2.DocumentStore.DocumentFormat;
+import edu.yu.cs.com1320.project.stage3.DocumentStore;
+import edu.yu.cs.com1320.project.stage3.Document;
+import edu.yu.cs.com1320.project.stage3.DocumentStore.DocumentFormat;
 
-import edu.yu.cs.com1320.project.stage2.impl.DocumentImpl;
-import edu.yu.cs.com1320.project.stage2.impl.DocumentStoreImpl;
+import edu.yu.cs.com1320.project.stage3.impl.DocumentImpl;
+import edu.yu.cs.com1320.project.stage3.impl.DocumentStoreImpl;
 
 public class HashTableImplTest2 {
     public static void main(String[] args) throws IOException {

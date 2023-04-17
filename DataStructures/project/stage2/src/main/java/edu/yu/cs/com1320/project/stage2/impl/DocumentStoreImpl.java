@@ -128,21 +128,10 @@ public class DocumentStoreImpl implements DocumentStore{
     private void addCommand(URI uri1) {
         Entry<URI, Document> entry = new Entry<URI, Document>(uri1, this.docStore.get(uri1));
         this.storage.push(entry);
+        Document doc = this.docStore.get(uri1);
 
         Function<URI, Boolean> undo = uri -> {
-            StackImpl<Entry<URI, Document>> tempStack = new StackImpl<Entry<URI, Document>>();
-            Document doc = null;
-            for (int i=0; i<storage.size(); i++) {
-                if (storage.peek().uri.equals(uri)) {
-                    doc = storage.pop().doc;
-                    break;
-                }
-                tempStack.push(storage.pop());
-            }
-            for (int i=0; i<tempStack.size(); i++){
-                this.storage.push(tempStack.pop());
-            }
-            return this.docStore.put(uri, doc) == null? false: true;
+            return this.docStore.put(uri1, doc) == null? false: true;
         };
 
         Command newCommand = new Command(uri1, undo);

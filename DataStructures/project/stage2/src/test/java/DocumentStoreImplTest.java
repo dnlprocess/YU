@@ -40,6 +40,26 @@ public class DocumentStoreImplTest {
         assertEquals(doc1, docStore.get(uri));
         docStore.undo();
         assertEquals(null, docStore.get(uri));
+
+        byte[] bytes3 = "example3".getBytes();
+        InputStream stream3 = new ByteArrayInputStream(bytes3);
+        int yu = docStore.put(stream3, uri, DocumentFormat.BINARY);
+        assertEquals(0, yu);
+        assertEquals(doc1.hashCode(), docStore.put(stream2, uri, DocumentFormat.BINARY));
+        
+        Document doc3 = new DocumentImpl(uri, bytes3);
+        docStore.put(null, uri, DocumentFormat.BINARY);
+        docStore.put(stream3, uri, DocumentFormat.BINARY);
+        assertEquals(doc3, docStore.get(uri));
+        docStore.undo();
+        assertEquals(null, docStore.get(uri));
+        docStore.undo();
+        assertEquals(doc2, docStore.get(uri));
+        docStore.undo();
+        assertEquals(doc1, docStore.get(uri));
+
+
+
     }
     
     /*
