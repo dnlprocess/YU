@@ -117,8 +117,12 @@ public class DocumentStoreImpl implements DocumentStore{
 
         addCommand(uri);
 
-        this.docStore.put(uri, null);
+        for(String keyword: this.docStore.get(uri).getWords()) {
+            this.docTrie.delete(keyword, this.docStore.get(uri));
+        }
 
+        this.docStore.put(uri, null);
+        
         return true;
     }
 
