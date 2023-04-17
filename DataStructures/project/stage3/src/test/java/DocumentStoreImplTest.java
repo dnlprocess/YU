@@ -139,28 +139,15 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testTrie() throws Exception {
-        DocumentStoreImpl docStore = new DocumentStoreImpl();
-        
-        uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
-        String txt1 = "This is the first test document.";
-        byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
-        inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
-        
-        docStore.put(inputStream1, uri1, DocumentFormat.TXT);
-        List<Document> docs = docStore.searchByPrefix("d");
-        assertEquals(1, docs.size());
-        assertEquals(doc1, docStore.get(uri1));
-        assertEquals(doc1.getWords(), docStore.get(uri1).getWords());
-        docStore.deleteAllWithPrefix("t");
-        docs = docStore.searchByPrefix("t");
+        List<Document> docs = store.searchByPrefix("t");
+        assertEquals(6, docs.size());
+        assertEquals(doc1, store.get(uri1));
+        assertEquals(doc1.getWords(), store.get(uri1).getWords());
+        store.deleteAllWithPrefix("t");
+        docs = store.searchByPrefix("t");
         assertEquals(0, docs.size());
-        //assertEquals(true, docStore.undoableStack.peek() instanceof CommandSet);
-        //assertEquals(2, docStore.undoableStack.size());
-        //assertEquals(true, ((CommandSet<URI>) docStore.undoableStack.peek()).genericCommands.contains(new GenericCommand<URI>(uri1, null)));
-        //assertEquals(true, ((CommandSet<URI>) docStore.undoableStack.peek()).containsTarget(uri1));
-        docStore.undo(uri1);
-        docs = docStore.searchByPrefix("t");
-        assertEquals(2, docs.size());
+        store.undo();
+        docs = store.searchByPrefix("t");
+        assertEquals(6, docs.size());
     }
 }
