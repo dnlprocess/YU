@@ -30,7 +30,7 @@ public class DocumentStoreImplTest {
     public void setUp() throws URISyntaxException, IOException {
         store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
-        String txt1 = "This is the first test document.";
+        String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
         doc1 = new DocumentImpl(uri1, txt1);
@@ -38,19 +38,27 @@ public class DocumentStoreImplTest {
         
         
         uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
-        String txt2 = "This is the second test document.";
+        String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
         doc2 = new DocumentImpl(uri2, txt2);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
-        String txt3 = "This is the third test document.";
+        String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
-        inputStream3 = new ByteArrayInputStream(binaryData3);
-        doc3 = new DocumentImpl(uri3, inputStream3.readAllBytes());
-        inputStream3 = new ByteArrayInputStream(binaryData3);
-        store.put(inputStream3, uri3, DocumentFormat.BINARY);
+        inputStream3 = new ByteArrayInputStream(txt3.getBytes());
+        doc3 = new DocumentImpl(uri3, txt3);
+        store.put(inputStream3, uri3, DocumentFormat.TXT);
+        
+        uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
+        String txt5 = "ti ti ti ti";
+        byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
+        inputStream5 = new ByteArrayInputStream(txt5.getBytes());
+        doc5 = new DocumentImpl(uri5, txt5);
+        store.put(inputStream5, uri5, DocumentFormat.TXT);
+
+
 
         uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
         String txt4 = "This is the fourth test document.";
@@ -59,13 +67,6 @@ public class DocumentStoreImplTest {
         doc4 = new DocumentImpl(uri4, inputStream4.readAllBytes());
         inputStream4 = new ByteArrayInputStream(binaryData3);
         store.put(inputStream4, uri4, DocumentFormat.BINARY);
-        
-        uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
-        String txt5 = "This is the fifth test document.";
-        byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
-        inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
-        store.put(inputStream5, uri5, DocumentFormat.TXT);
     }
 
     @Test
@@ -110,10 +111,11 @@ public class DocumentStoreImplTest {
     public void testSearch() throws Exception {
         // Test searching for documents
         List<Document> result = store.search("This");
-        assertEquals(3, result.size());
-        assertTrue(result.contains(uri1));
-        assertTrue(result.contains(uri2));
-        assertTrue(result.contains(uri5));
+        assertEquals(4, result.size());
+        assertTrue(result.contains(doc1));
+        assertTrue(result.contains(doc2));
+        assertTrue(result.contains(doc3));
+        assertTrue(result.contains(doc5));
     }
 
     @Test
@@ -140,7 +142,7 @@ public class DocumentStoreImplTest {
     @Test
     public void testTrie() throws Exception {
         List<Document> docs = store.searchByPrefix("t");
-        assertEquals(6, docs.size());
+        assertEquals(16, docs.size());
         assertEquals(doc1, store.get(uri1));
         assertEquals(doc1.getWords(), store.get(uri1).getWords());
         
@@ -151,8 +153,15 @@ public class DocumentStoreImplTest {
             docs = store.searchByPrefix("t");
             assertEquals(6, docs.size());
 
-        store.undo();
-        docs = store.searchByPrefix("t");
-        assertEquals(4, docs.size());
+        store.delete(uri5);
+        docs = store.search("last");
+        assertEquals(0, docs.size());
+    }
+
+    @Test
+    public void testSearchOrder() throws Exception {
+        List<Document> docs = store.searchByPrefix("t");
+        assertEquals(true, docs.get(0).getWords().contains("ti"));
+        assertEquals(true, docs.get(docs.size()-1).getWords().contains("ta"));
     }
 }

@@ -3,6 +3,7 @@ package edu.yu.cs.com1320.project.impl;
 import edu.yu.cs.com1320.project.Trie;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -35,6 +36,9 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @param val
      */
     public void put(String key, Value val) {
+        if (key == null) {
+            throw new IllegalArgumentException();
+        }
         if (val == null) {
             return;
         }
@@ -69,7 +73,7 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @return a List of matching Values, in descending order
      */
     public List<Value> getAllSorted(String key, Comparator<Value> comparator) {
-        if (comparator == null) {
+        if (comparator == null || key == null) {
             throw new IllegalArgumentException();
         }
 
@@ -80,6 +84,7 @@ public class TrieImpl<Value> implements Trie<Value>{
         }
         matches = x.vals;
         matches.sort(comparator);
+        Collections.reverse(matches);
         return matches;
     }
 
@@ -105,7 +110,7 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @return a List of all matching Values containing the given prefix, in descending order
      */
     public List<Value> getAllWithPrefixSorted(String prefix, Comparator<Value> comparator) {
-        if (comparator == null) {
+        if (comparator == null || prefix == null) {
             throw new IllegalArgumentException();
         }
         
@@ -117,6 +122,7 @@ public class TrieImpl<Value> implements Trie<Value>{
 
         getAllValues(x, prefix, matches);
         matches.sort(comparator);
+        Collections.reverse(matches);
         return matches;
     }
 
@@ -143,6 +149,9 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @return a Set of all Values that were deleted.
      */
     public Set<Value> deleteAllWithPrefix(String prefix) {
+        if (prefix == null) {
+            throw new IllegalArgumentException();
+        }
         Set<Value> deletedValues = new HashSet<Value>();
 
         Node<Value> node = get(root, prefix, 0);
@@ -177,6 +186,10 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @return a Set of all Values that were deleted.
      */
     public Set<Value> deleteAll(String key) {
+        if (key == null) {
+            throw new IllegalArgumentException();
+        }
+
         Set<Value> deletedValues = new HashSet<Value>();
     
         Node<Value> node = get(root, key, 0);
@@ -197,6 +210,10 @@ public class TrieImpl<Value> implements Trie<Value>{
      * @return the value which was deleted. If the key did not contain the given value, return null.
      */
     public Value delete(String key, Value val) {
+        if (key == null || val == null) {
+            throw new IllegalArgumentException();
+        }
+
         Node<Value> node = get(root, key, 0);
 
         if (node == null || !node.vals.contains(val)) {

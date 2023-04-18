@@ -78,7 +78,7 @@ public class DocumentStoreImpl implements DocumentStore{
         }
         
         Document doc = input == null? null: format.equals(DocumentFormat.TXT)? (Document) new DocumentImpl(uri, toTXT(input)): (Document) new DocumentImpl(uri, input.readAllBytes());
-        input.close();
+        if (input != null) input.close();
 
         addCommand(uri);
 
@@ -115,11 +115,11 @@ public class DocumentStoreImpl implements DocumentStore{
             return false;
         }
 
-        addCommand(uri);
-
         for(String keyword: this.docStore.get(uri).getWords()) {
             this.docTrie.delete(keyword, this.docStore.get(uri));
         }
+
+        addCommand(uri);
 
         this.docStore.put(uri, null);
         
@@ -175,16 +175,18 @@ public class DocumentStoreImpl implements DocumentStore{
 
     private Function<URI,Boolean> createUndo(URI commandURI) {
         Function<URI, Boolean> undo = uri -> {
+            if (this.docStore.get(uri) != null) {
+                for (String keyword: this.docStore.get(uri).getWords()) {
+                    this.docTrie.delete(keyword, this.docStore.get(uri));
+                }
+            }
             StackImpl<Entry<URI, Document>> tempArchive = new StackImpl<Entry<URI, Document>>();
             Document doc = null;
             for (int i=0; i<archive.size(); i++) {
                 if (archive.peek().entryMap.containsKey(uri)) {
                     doc = archive.peek().entryMap.get(uri);
                     archive.peek().entryMap.remove(uri);
-                    //normally would pop, now only pop if it is empty
-                    if (archive.peek().entryMap.isEmpty()) {
-                        archive.pop();
-                    }
+                    if (archive.peek().entryMap.isEmpty()) archive.pop(); //normally would pop, now only pop if it is empty
                     else {
                         tempArchive.push(archive.pop());
                     }
@@ -242,7 +244,6 @@ public class DocumentStoreImpl implements DocumentStore{
         }
         
         return s;*/
-        //return new String(input.readAllBytes(), StandardCharsets.UTF_8);
         byte[] bytes = input.readAllBytes();
 
         String s = new String(bytes);
@@ -285,7 +286,11 @@ public class DocumentStoreImpl implements DocumentStore{
 
         for (Document doc: this.docTrie.deleteAll(keyword)) {
             deletedURIs.add(doc.getKey());
+            for (String word: doc.getWords()) {
+                this.docTrie.delete(word, doc);
+            }
         }
+
 
         addCommandSet(deletedURIs);
 
@@ -307,6 +312,9 @@ public class DocumentStoreImpl implements DocumentStore{
 
         for (Document doc: this.docTrie.deleteAllWithPrefix(keywordPrefix)) {
             deletedURIs.add(doc.getKey());
+            for (String word: doc.getWords()) {
+                this.docTrie.delete(word, doc);
+            }
         }
 
         addCommandSet(deletedURIs);
