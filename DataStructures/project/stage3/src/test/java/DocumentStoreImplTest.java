@@ -164,4 +164,16 @@ public class DocumentStoreImplTest {
         assertEquals(true, docs.get(0).getWords().contains("ti"));
         assertEquals(true, docs.get(docs.size()-1).getWords().contains("ta"));
     }
+
+    @Test
+    public void testUndo() throws Exception {
+        store.deleteAllWithPrefix("t");
+        assertEquals(null, store.get(uri1));
+
+        store.undo(uri3);
+        List<Document> docs = store.searchByPrefix("td");
+        assertEquals(true, docs.get(0).getWords().contains("td"));
+        assertEquals(false, docs.get(docs.size()-1).getWords().contains("ti"));
+    
+    }
 }
