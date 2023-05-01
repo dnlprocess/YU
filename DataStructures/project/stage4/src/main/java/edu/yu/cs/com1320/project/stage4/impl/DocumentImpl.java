@@ -131,6 +131,9 @@ public class DocumentImpl implements Document {
 	@Override
 	public int compareTo(Document o) {
         //add safeguards
+        if (o == null) {
+            throw new IllegalArgumentException();
+        }
 		return (int) ((int) this.getLastUseTime() - o.getLastUseTime());
 	}
 

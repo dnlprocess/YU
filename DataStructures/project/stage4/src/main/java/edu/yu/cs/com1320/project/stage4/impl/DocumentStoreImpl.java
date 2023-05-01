@@ -22,7 +22,7 @@ import java.net.URI;
 import java.util.function.Function;
 
 
-public class DocumentStoreImpl implements DocumentStore{
+public class DocumentStoreImpl implements DocumentStore {
     private class DocumentComparator implements Comparator<Document> {
         String word;
 
@@ -56,6 +56,8 @@ public class DocumentStoreImpl implements DocumentStore{
 
         this.docCount = 0;
         this.docBytes = 0;
+        this.maxDocCount = Integer.MAX_VALUE;
+        this.maxDocBytes = Integer.MAX_VALUE;
     }
 
     /**

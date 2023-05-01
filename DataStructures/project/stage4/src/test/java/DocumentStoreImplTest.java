@@ -180,18 +180,26 @@ public class DocumentStoreImplTest {
     @Test
     public void testUndoMostRecentWhenMostRecentDeletedMultipleDocuments() throws Exception {
         DocumentStoreImpl documentStore = new DocumentStoreImpl();
-        URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
+        /*URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         URI uri2 = new URI("http://edu.yu.cs/com1320/2");
         URI uri3 = new URI("http://edu.yu.cs/com1320/project/3");
         URI uri4 = new URI("http://edu.yu.cs/com1320/project/4");
         URI uri5 = new URI("http://edu.yu.5");
-        URI uri6 = new URI("http://edu.yu.cs/6");
+        URI uri6 = new URI("http://edu.yu.cs/6");*/
+
+        URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
+        URI uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
+        URI uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
+        URI uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
+        URI uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
+        URI uri6 = new URI("http://edu.yu.cs/com1320/project/6");
+
         String content1 = "This is the content of document 1";
         String content2 = "Two too to";
         String content3 = "This is the content of document 3";
         String content4 = "When is the content of document 4";
         String content5 = "When is the content of document 5";
-        String content6 = "When is the content of document 6";
+        String content6 = "When is the content 6";
 
         // add all documents
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content6.getBytes()), uri6, DocumentStore.DocumentFormat.TXT));
