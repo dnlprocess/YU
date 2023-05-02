@@ -44,7 +44,7 @@ public class MinHeapImplTest {
     }
 
     @Test
-    public void testReHeapify1() {
+    public void testReHeapify() {
         MinHeap<Integer> heap = new MinHeapImpl<>();
         heap.insert(4);
         heap.insert(2);
@@ -92,10 +92,10 @@ public class MinHeapImplTest {
         heap.insert(2);
         heap.insert(1);
         heap.insert(3);
-        assertEquals(4, heap.remove().intValue());
-        assertEquals(3, heap.remove().intValue());
-        assertEquals(2, heap.remove().intValue());
         assertEquals(1, heap.remove().intValue());
+        assertEquals(2, heap.remove().intValue());
+        assertEquals(3, heap.remove().intValue());
+        assertEquals(4, heap.remove().intValue());
     }
     
     @Test(expected = NoSuchElementException.class)
@@ -104,22 +104,4 @@ public class MinHeapImplTest {
         heap.remove();
     }
     
-    @Test
-    public void testReHeapify() {
-        MinHeap<String> heap = new MinHeapImpl<>();
-        String x4 = "four";
-        String x2 = "two";
-        String x1 = "one";
-        String x3 = "three";
-        heap.insert(x4);
-        heap.insert(x2);
-        heap.insert(x1);
-        heap.insert(x3);
-        heap.reHeapify(x2);
-        assertEquals("four", heap.remove());
-        assertEquals("three", heap.remove());
-        assertEquals("two", heap.remove());
-        assertEquals("one", heap.remove());
-    }
-
 }

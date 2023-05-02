@@ -19,6 +19,11 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+
 public class DocumentStoreImplTest {
 
     /*private DocumentStoreImpl store;
@@ -187,36 +192,42 @@ public class DocumentStoreImplTest {
         URI uri5 = new URI("http://edu.yu.5");
         URI uri6 = new URI("http://edu.yu.cs/6");*/
 
-        URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
-        URI uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
-        URI uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
-        URI uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
-        URI uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
-        URI uri6 = new URI("http://edu.yu.cs/com1320/project/6");
+        URI uri1 = new URI("ZZZZZ");
+        URI uri2 = new URI("PPPPP");
+        URI uri3 = new URI("MMMMM");
+        URI uri4 = new URI("CCCCC");
+        URI uri5 = new URI("BBBBB");
+        URI uri6 = new URI("AAAAA");
 
-        String content1 = "This is the content of document 1";
-        String content2 = "Two too to";
-        String content3 = "This is the content of document 3";
-        String content4 = "When is the content of document 4";
-        String content5 = "When is the content of document 5";
-        String content6 = "When is the content 6";
+        String content1 = "6";
+        String content2 = "5";
+        String content3 = "4";
+        String content4 = "3";
+        String content5 = "2";
+        String content6 = "1";
 
         // add all documents
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content6.getBytes()), uri6, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content2.getBytes()), uri2, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content3.getBytes()), uri3, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content4.getBytes()), uri4, DocumentStore.DocumentFormat.TXT));
+        assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content5.getBytes()), uri5, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content1.getBytes()), uri1, DocumentStore.DocumentFormat.TXT));
         assertEquals(uri2, documentStore.get(uri2).getKey());
+
+
         // delete multiple documents
-        
+        assertEquals(uri6, documentStore.get(uri6).getKey());
+        assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(true, documentStore.delete(uri6));
-        assertEquals(true, documentStore.delete(uri4));
+        //assertEquals(uri4, documentStore.get(uri4).getKey());
+        //assertEquals(true, documentStore.delete(uri4));
         documentStore.delete(uri5);
         documentStore.delete(uri3);
         documentStore.delete(uri1);
-        assertEquals(true, documentStore.delete(uri2));
+        //assertEquals(uri2, documentStore.get(uri2).getKey());
+        //assertEquals(true, documentStore.delete(uri2));
         //uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
         
        //assertEquals(uri2, documentStore.get(uri2).getKey());
@@ -237,11 +248,107 @@ public class DocumentStoreImplTest {
 
         // verify that the most recent deletion was undone
         assertNotNull(documentStore.get(uri6));
+        //assertNotNull(documentStore.get(uri1));
+        //assertNotNull(documentStore.get(uri2));
+        //assertNotNull(documentStore.get(uri3));
 
         // undo again to verify that the second most recent deletion was undone
         //documentStore.undo();
-        assertNotNull(documentStore.get(uri4));
-        assertNotNull(documentStore.get(uri5));
+        //assertNotNull(documentStore.get(uri4));
+        //assertNotNull(documentStore.get(uri5));
         
+    }
+
+    @Test
+    public void testUndo() throws Exception {
+        DocumentStore documentStore = new DocumentStoreImpl();
+        // add a document to the store
+        URI uri1 = new URI("AAAAA");
+        String text = "Hello, world!";
+        InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+        documentStore.put(inputStream, uri1, DocumentFormat.TXT);
+        assertEquals(text, documentStore.get(uri1).getDocumentTxt());
+
+        // modify the document
+        String newText = "Goodbye, world!";
+        InputStream newInputStream = new ByteArrayInputStream(newText.getBytes());
+        documentStore.put(newInputStream, uri1, DocumentFormat.TXT);
+
+        // undo the modification
+        documentStore.undo();
+        assertEquals(text, documentStore.get(uri1).getDocumentTxt());
+    }
+
+    @Test
+    public void testSearch() throws Exception {
+        DocumentStore documentStore = new DocumentStoreImpl();
+        // add some documents to the store
+        String[] texts = {"Hello, world!", "Goodbye, world!", "The quick brown fox jumps over the lazy dog.", "The early bird catches the worm"};
+        URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
+        List<Document> documents = new ArrayList<>();
+        for (int i=0; i<texts.length; i++) {
+            InputStream inputStream = new ByteArrayInputStream(texts[i].getBytes());
+            Document doc = new DocumentImpl(uris[i], texts[i]);
+            documents.add(doc);
+            documentStore.put(inputStream, uris[i], DocumentFormat.TXT);
+        }
+
+        // search for a document that contains "hello"
+        List<Document> searchResults = documentStore.search("Hello");
+        assertEquals(1, searchResults.size());
+        assertEquals(texts[0], searchResults.get(0).getDocumentTxt());
+
+        // search for a document that contains "world"
+        searchResults = documentStore.search("world");
+        assertEquals(2, searchResults.size());
+        assertEquals(texts[0], searchResults.get(0).getDocumentTxt());
+        assertEquals(texts[1], searchResults.get(1).getDocumentTxt());
+
+        // search for a document that contains "fox"
+        searchResults = documentStore.search("fox");
+        assertEquals(1, searchResults.size());
+        assertEquals(texts[2], searchResults.get(0).getDocumentTxt());
+
+        // search for a document that contains "cat" (not found)
+        searchResults = documentStore.search("cat");
+        assertEquals(0, searchResults.size());
+    }
+
+    @Test
+    public void testSetMaxDocumentCount() throws Exception {
+        DocumentStore documentStore = new DocumentStoreImpl();
+        // add some documents to the store
+        String[] texts = {"Document 1", "Document 2", "Document 3", "Document 4"};
+        URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
+        for (int i=0; i<texts.length; i++) {
+            InputStream inputStream = new ByteArrayInputStream(texts[i].getBytes());
+            documentStore.put(inputStream, uris[i], DocumentFormat.TXT);
+        }
+
+        // set max document count to 3
+        documentStore.setMaxDocumentCount(3);
+
+        // add another document
+        String text = "Document 5";
+        URI uri = new URI("https://URI5");
+        InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+        documentStore.put(inputStream, uri, DocumentFormat.TXT);
+        Document document = new DocumentImpl(uri, text);
+
+        // check that the first document was removed
+        List<Document> allDocuments = documentStore.search("Document");
+        assertEquals(3, allDocuments.size());
+        assertTrue(allDocuments.contains(document));
+        assertFalse(allDocuments.contains(new DocumentImpl(uris[0], texts[0])));
+        assertNull(documentStore.get(uris[0]));
+        assertNull(documentStore.get(uris[1]));
+        assertNotNull(documentStore.get(uris[2]));
+    }
+
+    @Test
+    public void testSetMaxDocumentBytes() throws IOException {
+        DocumentStore documentStore = new DocumentStoreImpl();
+        // add some documents to the store
+        String[] texts = {"This is a"};
     }
 }

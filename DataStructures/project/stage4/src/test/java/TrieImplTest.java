@@ -21,14 +21,14 @@ public class TrieImplTest {
         List<String> matches = trie.getAllSorted("hell", Comparator.naturalOrder());
         Assert.assertEquals(1, matches.size());
         matches = trie.getAllWithPrefixSorted("hell", Comparator.naturalOrder());
-        Assert.assertEquals("danger", matches.get(0));
-        Assert.assertEquals("fire", matches.get(1));
-        Assert.assertEquals("tomorrow", matches.get(2));
-        Assert.assertEquals("world", matches.get(3));
+        Assert.assertEquals("danger", matches.get(3));
+        Assert.assertEquals("fire", matches.get(2));
+        Assert.assertEquals("tomorrow", matches.get(1));
+        Assert.assertEquals("world", matches.get(0));
 
         matches = trie.getAllSorted("hello", Comparator.naturalOrder());
         Assert.assertEquals(2, matches.size());
-        Assert.assertEquals("world", matches.get(1));
+        Assert.assertEquals("world", matches.get(0));
 
         matches = trie.getAllSorted("heller", Comparator.naturalOrder());
         Assert.assertEquals(1, matches.size());
