@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.function.Function;
 
+import javax.crypto.IllegalBlockSizeException;
+
 
 public class DocumentStoreImpl implements DocumentStore {
     private class DocumentComparator implements Comparator<Document> {
