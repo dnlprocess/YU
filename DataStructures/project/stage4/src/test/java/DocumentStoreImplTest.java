@@ -476,7 +476,7 @@ public class DocumentStoreImplTest {
     public void testSearchOrder() throws Exception {
         store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
-        String txt1 = "ta";
+        String txt1 = "tz";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
         doc1 = new DocumentImpl(uri1, txt1);
@@ -515,9 +515,9 @@ public class DocumentStoreImplTest {
         store.put(inputStream4, uri4, DocumentFormat.BINARY);
 
         List<Document> docs = store.searchByPrefix("t");
-        assertEquals(txt5, docs.get(4).getDocumentTxt());
+        assertEquals(txt5, docs.get(0).getDocumentTxt());
         //assertEquals(true, docs.get(0).getWords().contains("ti"));
-        assertEquals(true, docs.get(docs.size()-1).getWords().contains("ta"));
+        assertEquals(true, docs.get(docs.size()-1).getWords().contains("tz"));
     }
 
     @Test

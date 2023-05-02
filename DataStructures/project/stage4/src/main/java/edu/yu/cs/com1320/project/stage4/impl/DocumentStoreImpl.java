@@ -36,6 +36,31 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
+    private class DocumentPrefixComparator implements Comparator<Document> {
+        String prefix;
+
+        public DocumentPrefixComparator(String prefix) {
+            this.prefix = prefix;
+        }
+
+        public int compare(Document doc, Document otherDoc) {
+            int doc1PrefixCount = countPrefixOccurrences(doc);
+            int doc2PrefixCount = countPrefixOccurrences(otherDoc);
+    
+            return Integer.compare(doc1PrefixCount, doc2PrefixCount);
+        }
+
+        private int countPrefixOccurrences(Document doc) {
+            int count = 0;
+            for (String word : doc.getWords()) {
+                if (word.startsWith(this.prefix)) {
+                    count += doc.wordCount(word);
+                }
+            }
+            return count;
+        }
+    }
+
     private HashTableImpl<URI, Document> docStore;
     private StackImpl<Undoable> undoableStack;
     //public StackImpl<Undoable> undoableStack;
@@ -280,7 +305,7 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return a List of the matches. If there are no matches, return an empty list.
      */
     public List<Document> searchByPrefix(String keywordPrefix) {
-        DocumentComparator prefixComparator = new DocumentComparator(keywordPrefix);
+        DocumentPrefixComparator prefixComparator = new DocumentPrefixComparator(keywordPrefix);
         List<Document> documents = this.docTrie.getAllWithPrefixSorted(keywordPrefix, prefixComparator);
         
         for (Document doc: documents) {
