@@ -1,0 +1,11 @@
+-------------------------------------------------------------------------------
+Test set: project.GameTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.001 s <<< FAILURE! - in project.GameTest
+creationTest  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problem: 
+	The constructor Game() is undefined
+
+	at project.GameTest.creationTest(GameTest.java:12)
+

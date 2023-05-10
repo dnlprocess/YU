@@ -1,0 +1,11 @@
+-------------------------------------------------------------------------------
+Test set: project.ChessBoardTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.151 s <<< FAILURE! - in project.ChessBoardTest
+undoTest  Time elapsed: 0.002 s  <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problem: 
+	The method isClear(int, int, int, int, Class<? extends ChessPiece>) in the type ChessBoard is not applicable for the arguments (int, int, int, int)
+
+	at project.ChessBoardTest.undoTest(ChessBoardTest.java:30)
+

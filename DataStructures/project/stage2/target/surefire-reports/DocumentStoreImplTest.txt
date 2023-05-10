@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: DocumentStoreImplTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.022 s <<< FAILURE! - in DocumentStoreImplTest
+testPutDocBytes(DocumentStoreImplTest)  Time elapsed: 0.009 s  <<< ERROR!
+java.lang.IllegalArgumentException
+	at DocumentStoreImplTest.testPutDocBytes(DocumentStoreImplTest.java:48)
+
