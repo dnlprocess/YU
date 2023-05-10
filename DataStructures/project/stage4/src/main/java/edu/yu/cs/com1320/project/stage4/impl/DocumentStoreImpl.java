@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.function.Function;
 
-import javax.crypto.IllegalBlockSizeException;
-
 
 public class DocumentStoreImpl implements DocumentStore {
     private class DocumentComparator implements Comparator<Document> {
@@ -92,7 +90,14 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return the given document
      */
     public Document get(URI uri) {
-        return this.docStore.get(uri);
+        Document doc = this.docStore.get(uri);
+
+        if (doc != null) {
+            doc.setLastUseTime(System.nanoTime());
+            this.docHeap.reHeapify(doc);
+        }
+
+        return doc;
     }
 
     /**
@@ -412,6 +417,7 @@ public class DocumentStoreImpl implements DocumentStore {
         removeStack(uri);
     }
 
+    @SuppressWarnings("unchecked")
     private void removeStack(URI uri) {
         StackImpl<Undoable> tempStack = new StackImpl<Undoable>();
         for (int i=0; i<this.undoableStack.size(); i++) {

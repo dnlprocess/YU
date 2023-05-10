@@ -66,8 +66,8 @@ public class DocumentImpl implements Document {
     @Override
     public int hashCode() {
         int result = this.uri.hashCode();
-        result = 31 * result + (this.text != null ? this.text.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(this.binaryData);
+        result = 31 * result + (this.text != null ? this.text.hashCode() : Arrays.hashCode(this.binaryData));
+        result = Math.abs(result);
         return result;
     }
 
