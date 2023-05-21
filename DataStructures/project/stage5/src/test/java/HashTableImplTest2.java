@@ -21,7 +21,7 @@ import edu.yu.cs.com1320.project.stage3.impl.DocumentStoreImpl;
 
 public class HashTableImplTest2 {
     public static void main(String[] args) throws IOException {
-        DocumentStoreImpl docStore = new DocumentStoreImpl();
+        DocumentStoreImplOld docStore = new DocumentStoreImplOld();
         URI uri = URI.create("http://www.example.com");
 
         byte[] bytes1 = "example1".getBytes();

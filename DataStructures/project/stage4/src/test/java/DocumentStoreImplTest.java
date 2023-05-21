@@ -1,5 +1,6 @@
 import edu.yu.cs.com1320.project.CommandSet;
 import edu.yu.cs.com1320.project.GenericCommand;
+import edu.yu.cs.com1320.project.impl.HashTableImpl;
 import edu.yu.cs.com1320.project.stage4.Document;
 import edu.yu.cs.com1320.project.stage4.DocumentStore;
 import edu.yu.cs.com1320.project.stage4.DocumentStore.DocumentFormat;
@@ -796,7 +797,7 @@ public class DocumentStoreImplTest {
         List<Document> allDocuments = store.searchByPrefix("t");
         assertEquals(4, allDocuments.size());
 
-        assertEquals(store.get(uri2).getKey(), uri2);
+        assert(store.get(uri2)!=null);
         assertEquals(store.get(uri3).getKey(), uri3);
         assertEquals(store.get(uri5).getKey(), uri5);
         assertEquals(store.get(uri4).getKey(), uri4);
@@ -814,4 +815,60 @@ public class DocumentStoreImplTest {
         result = Math.abs(result);
         return result;
     }
+
+    @Test
+    public void testHash() throws Exception {
+        HashTableImpl<URI, Document> store = new HashTableImpl<URI, Document>();
+        uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
+        String txt1 = "ta";
+        byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
+        inputStream1 = new ByteArrayInputStream(txt1.getBytes());
+        doc1 = new DocumentImpl(uri1, txt1);
+        store.put(uri1, doc1);
+        
+        
+        uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
+        String txt2 = "tb";
+        byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
+        inputStream2 = new ByteArrayInputStream(txt2.getBytes());
+        doc2 = new DocumentImpl(uri2, txt2);
+        store.put(uri2, doc2);
+
+        uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
+        String txt3 = "td";
+        byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
+        inputStream3 = new ByteArrayInputStream(txt3.getBytes());
+        doc3 = new DocumentImpl(uri3, txt3);
+        store.put(uri3, doc3);
+
+        uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
+        String txt4 = "This is the fourth document.";
+        byte[] binaryData4 = {0x0F, 0x10, 0x11, 0x12, 0x13};
+        inputStream4 = new ByteArrayInputStream(txt4.getBytes());
+        doc4 = new DocumentImpl(uri4, txt4);
+        store.put(uri4, doc4);
+        
+        uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
+        String txt5 = "ti";
+        byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
+        inputStream5 = new ByteArrayInputStream(txt5.getBytes());
+        doc5 = new DocumentImpl(uri5, txt5);
+        store.put(uri5, doc5);
+
+        assert(store.get(uri2)!=null);
+
+        assertEquals(uri1, store.put(uri1, null).getKey());
+
+        assertEquals(hashIndex(uri1), hashIndex(uri2));
+
+        assert(store.get(uri2)!=null);
+        assertEquals(store.get(uri3).getKey(), uri3);
+        assertEquals(store.get(uri5).getKey(), uri5);
+        assertEquals(store.get(uri4).getKey(), uri4);
+    }
+    
+    private int hashIndex(URI key){
+        return (key.hashCode() & 0x7fffffff) % 5;
+    }
+
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.HashMap;
 
 public class DocumentImpl implements Document {
@@ -16,7 +17,7 @@ public class DocumentImpl implements Document {
     private URI uri;
     private String text;
     private byte[] binaryData;
-    private HashMap<String, Integer> wordCountMap;
+    private Map<String, Integer> wordCountMap;
     private long lastUseTime;
 
     public DocumentImpl(URI uri, byte[] binaryData) {
@@ -30,16 +31,15 @@ public class DocumentImpl implements Document {
         this.wordCountMap = new HashMap<String, Integer>();
     }
 
-    public DocumentImpl(URI uri, String txt) {
+    public DocumentImpl(URI uri, String text, Map<String, Integer> wordCountMap) {
         testURI(uri);
-        if (txt == null || txt.isEmpty()) {
-            throw new IllegalArgumentException(txt);
+        if (text == null || text.isEmpty()) {
+            throw new IllegalArgumentException(text);
         }
         this.uri = uri;
-        this.text = txt;
+        this.text = text;
         this.binaryData = null;
-        this.wordCountMap = new HashMap<String, Integer>();
-        map(txt);
+        this.wordCountMap = wordCountMap == null ? map(text) : wordCountMap;
     }
 
     /**
@@ -111,11 +111,12 @@ public class DocumentImpl implements Document {
         return set;
     }
 
-    private void map(String txt) {
+    private Map<String, Integer> map(String txt) {
         //string won't be empty
         Pattern pattern = Pattern.compile("[a-zA-Z0-9]+");
         ArrayList<String> words = new ArrayList<String>();
         Matcher matcher = pattern.matcher(txt);
+        Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
         
         while (matcher.find()) {
             String word = matcher.group();
@@ -123,9 +124,11 @@ public class DocumentImpl implements Document {
         }
 
         for (String word: words) {
-            Integer count = this.wordCountMap.get(word);
-            this.wordCountMap.put(word, (count == null? 0: count) +1);
+            Integer count = wordCountMap.get(word);
+            wordCountMap.put(word, (count == null? 0: count) +1);
         }
+
+        return wordCountMap;
     }
 
 	@Override
@@ -146,4 +149,14 @@ public class DocumentImpl implements Document {
 	public void setLastUseTime(long timeInNanoseconds) {
         this.lastUseTime = timeInNanoseconds;
 	}
+
+    @Override
+    public Map<String, Integer> getWordMap() {
+        return new HashMap<String, Integer>(this.wordCountMap);
+    }
+
+    @Override
+    public void setWordMap(Map<String, Integer> wordMap) {
+        this.wordCountMap = wordMap;
+    }
 }

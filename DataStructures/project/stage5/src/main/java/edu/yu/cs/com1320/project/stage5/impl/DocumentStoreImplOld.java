@@ -11,7 +11,6 @@ import edu.yu.cs.com1320.project.Undoable;
 import edu.yu.cs.com1320.project.MinHeap;
 import edu.yu.cs.com1320.project.impl.MinHeapImpl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.Comparator;
@@ -23,7 +22,7 @@ import java.net.URI;
 import java.util.function.Function;
 
 
-public class DocumentStoreImpl implements DocumentStore {
+public class DocumentStoreImplOld implements DocumentStore {
     private class DocumentComparator implements Comparator<Document> {
         String word;
 
@@ -60,27 +59,25 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    private BTreeImpl<URI, Document> docStore;
+    private HashTableImpl<URI, Document> docStore;
     private StackImpl<Undoable> undoableStack;
     //public StackImpl<Undoable> undoableStack;
     //public StackImpl<HashMap<URI, Document>> archive;
     private StackImpl<HashMap<URI, Document>> archive;
-    private TrieImpl<URI> docTrie;
-    private MinHeap<URI> docHeap;
-    private DocumentPersistenceManager docPersistenceManager;
+    private TrieImpl<Document> docTrie;
+    private MinHeap<Document> docHeap;
 
     private int docCount;
     private int docBytes;
     private int maxDocCount;
     private int maxDocBytes;
 
-    public DocumentStoreImpl() {
+    public DocumentStoreImplOld() {
         this.docStore = new HashTableImpl<URI, Document>();
         this.undoableStack = new StackImpl<Undoable>();
         this.archive = new StackImpl<HashMap<URI, Document>>();
-        this.docTrie = new TrieImpl<URI>();
-        this.docHeap = new MinHeapImpl<URI>();
-        this.docPersistenceManager = new DocumentPersistenceManager(null);
+        this.docTrie = new TrieImpl<Document>();
+        this.docHeap = new MinHeapImpl<Document>();
 
         this.docCount = 0;
         this.docBytes = 0;
@@ -88,21 +85,16 @@ public class DocumentStoreImpl implements DocumentStore {
         this.maxDocBytes = Integer.MAX_VALUE;
     }
 
-    public DocumentStoreImpl(File baseDir) {
-        this();
-        this.docPersistenceManager = new DocumentPersistenceManager(baseDir);
-    }
-
     /**
      * @param uri the unique identifier of the document to get
      * @return the given document
      */
     public Document get(URI uri) {
-        Document doc = this.BTreeImpl.get(uri);
+        Document doc = this.docStore.get(uri);
 
         if (doc != null) {
             doc.setLastUseTime(System.nanoTime());
-            this.docHeap.reHeapify(uri);
+            this.docHeap.reHeapify(doc);
         }
 
         return doc;

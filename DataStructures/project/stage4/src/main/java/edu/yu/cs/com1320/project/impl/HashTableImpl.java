@@ -1,5 +1,7 @@
 package edu.yu.cs.com1320.project.impl;
 
+import java.io.IOException;
+
 import edu.yu.cs.com1320.project.HashTable;
 
 public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
@@ -43,14 +45,18 @@ public class HashTableImpl<Key,Value> implements HashTable<Key,Value>{
 
         Value put(Key key, Value value) {
             Value pastValue = null;
-            for (Pair current = this.head; current != null; current = current.next) {
+            Pair current;
+            for (current = this.head; current != null; current = current.next) {
                 if (current.key.equals(key)) {
                     pastValue = current.value;
                     current.value = value;
-                    return pastValue;
+                    break;
                 }
             }
-            this.head = new Pair(key, value, this.head);
+            if (current == null) {
+                // key was not found, so add a new Pair object to the end of the list
+                this.head = new Pair(key, value, this.head);
+            }
             return pastValue;
         }
 

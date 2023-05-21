@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class DocumentStoreImplTest {
 
-    private DocumentStoreImpl store;
+    private DocumentStoreImplOld store;
     private URI uri1, uri2, uri3, uri4, uri5;
     private Document doc1, doc2, doc3, doc4, doc5;
     private InputStream inputStream1, inputStream2, inputStream3, inputStream4, inputStream5;
@@ -76,7 +76,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testPutAndGetTxtDocument() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -128,7 +128,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testPutAndGetBinaryDocument() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -180,7 +180,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testDelete() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -231,7 +231,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearch1() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -277,7 +277,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testNullInputStream() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -323,7 +323,7 @@ public class DocumentStoreImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullURI() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -369,7 +369,7 @@ public class DocumentStoreImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullFormat() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -415,7 +415,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testTrie() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -474,7 +474,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearchOrder() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "tz";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -522,7 +522,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndo1() throws Exception {
-        store = new DocumentStoreImpl();
+        store = new DocumentStoreImplOld();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
@@ -574,7 +574,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndoMostRecentWhenMostRecentDeletedMultipleDocuments() throws Exception {
-        DocumentStoreImpl documentStore = new DocumentStoreImpl();
+        DocumentStoreImplOld documentStore = new DocumentStoreImplOld();
         /*URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         URI uri2 = new URI("http://edu.yu.cs/com1320/2");
         URI uri3 = new URI("http://edu.yu.cs/com1320/project/3");
@@ -651,7 +651,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndo() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImpl();
+        DocumentStore documentStore = new DocumentStoreImplOld();
         // add a document to the store
         URI uri1 = new URI("AAAAA");
         String text = "Hello, world!";
@@ -671,7 +671,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearch() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImpl();
+        DocumentStore documentStore = new DocumentStoreImplOld();
         // add some documents to the store
         String[] texts = {"Hello, world!", "Goodbye, world word world", "The quick brown fox jumps over the lazy dog.", "The early bird catches the worm"};
         URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
@@ -706,7 +706,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSetMaxDocumentCount() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImpl();
+        DocumentStore documentStore = new DocumentStoreImplOld();
         // add some documents to the store
         String[] texts = {"Document 1", "Document 2", "Document 3", "Document 4"};
         URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
@@ -737,7 +737,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSetMaxDocumentBytes() throws IOException {
-        DocumentStore documentStore = new DocumentStoreImpl();
+        DocumentStore documentStore = new DocumentStoreImplOld();
         // add some documents to the store
         String[] texts = {"This is a"};
     }
