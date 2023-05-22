@@ -411,31 +411,6 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void removeStack(URI uri) {
-        StackImpl<Undoable> tempStack = new StackImpl<Undoable>();
-        for (int i=0; i<this.undoableStack.size(); i++) {
-            if (this.undoableStack.peek() instanceof CommandSet && ((CommandSet<URI>) this.undoableStack.peek()).containsTarget(uri)) {
-                CommandSet<URI> commandSet = new CommandSet<URI>();
-                for (GenericCommand<URI> command: (CommandSet<URI>) this.undoableStack.peek()) {
-                    if (command.getTarget() == uri) {
-                        break;
-                    }
-                    commandSet.addCommand(command);
-                }
-                this.undoableStack.pop();
-                if (commandSet.size()!=0) this.undoableStack.push(commandSet);
-                break;
-            }
-            else if (this.undoableStack.peek() instanceof GenericCommand && ((GenericCommand<URI>) this.undoableStack.peek()).getTarget().equals(uri)){
-                this.undoableStack.pop();
-                break;
-            }
-            tempStack.push(this.undoableStack.pop());
-        }
-        for (int i=0; i<tempStack.size(); i++) this.undoableStack.push(tempStack.pop());
-    }
-
     private void putDocTrie(Document doc) {
         if (doc == null || doc.getDocumentTxt() == null) {
             return;
