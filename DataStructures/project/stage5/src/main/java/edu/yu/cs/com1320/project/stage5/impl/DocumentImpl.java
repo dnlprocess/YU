@@ -1,6 +1,7 @@
 package edu.yu.cs.com1320.project.stage5.impl;
 
 import edu.yu.cs.com1320.project.stage5.Document;
+import edu.yu.cs.com1320.project.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,10 +66,7 @@ public class DocumentImpl implements Document {
 
     @Override
     public int hashCode() {
-        int result = this.uri.hashCode();
-        result = 31 * result + (this.text != null ? this.text.hashCode() : Arrays.hashCode(this.binaryData));
-        result = Math.abs(result);
-        return result;
+        return Utils.calculateHashCode(this.uri, this.text, this.binaryData);
     }
 
     @Override

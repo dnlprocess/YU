@@ -4,6 +4,7 @@ import edu.yu.cs.com1320.project.stage5.DocumentStore;
 import edu.yu.cs.com1320.project.stage5.Document;
 import edu.yu.cs.com1320.project.GenericCommand;
 import edu.yu.cs.com1320.project.CommandSet;
+import edu.yu.cs.com1320.project.impl.BTreeImpl;
 import edu.yu.cs.com1320.project.impl.HashTableImpl;
 import edu.yu.cs.com1320.project.impl.StackImpl;
 import edu.yu.cs.com1320.project.impl.TrieImpl;
@@ -24,6 +25,10 @@ import java.util.function.Function;
 
 
 public class DocumentStoreImpl implements DocumentStore {
+    private class URIComparator implements Comparator<URI> {
+
+    }
+
     private class DocumentComparator implements Comparator<Document> {
         String word;
 
@@ -61,10 +66,8 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     private BTreeImpl<URI, Document> docStore;
+    private Set<URI> docsInMemUris;
     private StackImpl<Undoable> undoableStack;
-    //public StackImpl<Undoable> undoableStack;
-    //public StackImpl<HashMap<URI, Document>> archive;
-    private StackImpl<HashMap<URI, Document>> archive;
     private TrieImpl<URI> docTrie;
     private MinHeap<URI> docHeap;
     private DocumentPersistenceManager docPersistenceManager;
@@ -75,9 +78,9 @@ public class DocumentStoreImpl implements DocumentStore {
     private int maxDocBytes;
 
     public DocumentStoreImpl() {
-        this.docStore = new HashTableImpl<URI, Document>();
+        this.docStore = new BTreeImpl<URI, Document>();
+        this.docsInMemUris = new HashSet<URI>();
         this.undoableStack = new StackImpl<Undoable>();
-        this.archive = new StackImpl<HashMap<URI, Document>>();
         this.docTrie = new TrieImpl<URI>();
         this.docHeap = new MinHeapImpl<URI>();
         this.docPersistenceManager = new DocumentPersistenceManager(null);
@@ -98,7 +101,7 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return the given document
      */
     public Document get(URI uri) {
-        Document doc = this.BTreeImpl.get(uri);
+        Document doc = this.docStore.get(uri);
 
         if (doc != null) {
             doc.setLastUseTime(System.nanoTime());
