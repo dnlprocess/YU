@@ -2,6 +2,7 @@ package edu.yu.cs.com1320.project.impl;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 import edu.yu.cs.com1320.project.BTree;
 import edu.yu.cs.com1320.project.stage5.PersistenceManager;
@@ -297,6 +298,10 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
     @Override
     @SuppressWarnings("unchecked")
     public void moveToDisk(Key k) throws Exception {
+        if (k == null) {
+            throw new NoSuchElementException();
+        }
+
         Entry entry = get(this.root, k, this.height);
         
         if (entry != null && entry.isInMemory() && entry.val != null) {

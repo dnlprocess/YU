@@ -183,6 +183,7 @@ public class DocumentStoreImpl implements DocumentStore {
         }
 
         removeHeapDoc(uri);
+        removeDocTrie(this.docStore.get(uri));
         putDocTrie(doc);
         return this.docStore.put(uri, doc).hashCode();
     }
@@ -255,7 +256,9 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    private Function<URI,Boolean> createUndo(URI commandURI, Document doc) {
+    private Function<URI,Boolean> createUndo(URI commandURI, Document undoDoc) {
+        Document doc = undoDoc.getDocumentBinaryData() == null? new DocumentImpl(commandURI, undoDoc.getDocumentTxt(), undoDoc.getWordMap()): new DocumentImpl(commandURI, undoDoc.getDocumentBinaryData());
+        
         Function<URI, Boolean> undo = (URI uri) -> {
             if (this.docStore.get(uri) != null) {
                 removeDocTrie(this.docStore.get(uri));
