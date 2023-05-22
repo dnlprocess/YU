@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.io.InputStream;
 import java.net.URI;
@@ -33,9 +34,9 @@ public class DocumentStoreImpl implements DocumentStore {
         private final URI uri;
         private long lastUseTime;
 
-        public URIUseTimeComparator(URI uri) {
+        public URIUseTimeComparator(URI uri, long lastUseTime) {
             this.uri = uri;
-            this.lastUseTime = docStore.get(uri).getLastUseTime();
+            this.lastUseTime = lastUseTime;
         }
 
         @Override
@@ -146,7 +147,7 @@ public class DocumentStoreImpl implements DocumentStore {
             }
             else {
                 doc.setLastUseTime(System.nanoTime());
-                this.docHeap.reHeapify(new URIUseTimeComparator(uri));
+                this.docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
             }
         }
 
@@ -172,18 +173,18 @@ public class DocumentStoreImpl implements DocumentStore {
         Document doc = input == null? null: format.equals(DocumentFormat.TXT)? (Document) new DocumentImpl(uri, toTXT(input), null): (Document) new DocumentImpl(uri, input.readAllBytes());
         if (input != null) {
             input.close();
-            putDocHeap(uri);
+            putDocHeap(doc);
         }
 
-        addCommand(uri);
+        addCommand(uri, docStore.get(uri));
 
-        if (!this.docStore.containsKey(uri)) {
+        if (this.docStore.get(uri) == null) {
             putDocTrie(doc);
             this.docStore.put(uri, doc);
             return 0;
         }
 
-        removeHeapDoc(this.docStore.get(uri));
+        removeHeapDoc(uri);
         putDocTrie(doc);
         return this.docStore.put(uri, doc).hashCode();
     }
@@ -193,21 +194,18 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return true if the document is deleted, false if no document exists with that URI
      */
     public boolean delete(URI uri) {
-        //delete from heap and build in way for undo to add back to heap
-        if (!this.docStore.containsKey(uri)) {
+        Document doc = this.docStore.get(uri);
+        
+        if (doc == null) {
             return false;
         }
 
-        Document doc = this.docStore.get(uri);
+        removeDocTrie(this.docStore.get(uri));
 
-        for(String keyword: doc.getWords()) {
-            this.docTrie.delete(keyword, doc);
-        }
-
-        addCommand(uri);
+        addCommand(uri, doc);
 
         this.docStore.put(uri, null);
-        removeHeapDoc(doc);
+        removeHeapDoc(uri);
         
         return true;
     }
@@ -259,61 +257,37 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    private Function<URI,Boolean> createUndo(URI commandURI) {
-        Function<URI, Boolean> undo = uri -> {
+    private Function<URI,Boolean> createUndo(URI commandURI, Document doc) {
+        Function<URI, Boolean> undo = (URI uri) -> {
             if (this.docStore.get(uri) != null) {
-                for (String keyword: this.docStore.get(uri).getWords()) {
-                    this.docTrie.delete(keyword, this.docStore.get(uri));
-                }
-                removeHeapDoc(this.docStore.get(uri));
+                removeDocTrie(this.docStore.get(uri));
+                removeHeapDoc(uri);
             }
-            StackImpl<HashMap<URI, Document>> tempArchive = new StackImpl<HashMap<URI, Document>>();
-            Document doc = null;
-            for (int i=0; i<archive.size(); i++) {
-                if (archive.peek().containsKey(uri)) {
-                    doc = archive.peek().get(uri);
-                    archive.peek().remove(uri);
-                    if (archive.peek().isEmpty()) archive.pop(); //normally would pop, now only pop if it is empty
-                    else tempArchive.push(archive.pop());
-                    break;
-                }
-                tempArchive.push(archive.pop());
-            }
-            for (int i=0; i<tempArchive.size(); i++){
-                this.archive.push(tempArchive.pop());
-            }
-            putDocHeap(uri, doc);
-            this.docStore.put(uri, doc);
+
+            putDocHeap(doc);
             putDocTrie(doc);
+            this.docStore.put(uri, doc);
+            enforceLimits();
             return true;
         };
         return undo;
     }
 
-    private void addCommandSet(Set<URI> commandURIs) {
-        HashMap<URI, Document> entry = new HashMap<URI, Document>();
-
+    private void addCommandSet(List<URI> commandURIs, List<Document> docs) {
         CommandSet<URI> newCommandSet = new CommandSet<URI>();
 
-        for (URI uri: commandURIs) {
-            entry.put(uri, this.docStore.get(uri));
-        }
+        Iterator<URI> uriIterator = commandURIs.iterator();
+        Iterator<Document> docIterator = docs.iterator();
 
-        this.archive.push(entry);
-
-        for (URI uri: commandURIs) {
-            newCommandSet.addCommand(new GenericCommand<URI>(uri, createUndo(uri)));
+        while (uriIterator.hasNext() && docIterator.hasNext()) {
+            newCommandSet.addCommand(new GenericCommand<URI>(uriIterator.next(), createUndo(uriIterator.next(), docIterator.next())));
         }
 
         this.undoableStack.push(newCommandSet);
     }
 
-    private void addCommand(URI commandURI) {
-        HashMap<URI, Document> entry = new HashMap<URI, Document>();
-
-        entry.put(commandURI, this.docStore.get(commandURI));
-
-        GenericCommand<URI> newCommand = new GenericCommand<URI>(commandURI, createUndo(commandURI));
+    private void addCommand(URI commandURI, Document doc) {
+        GenericCommand<URI> newCommand = new GenericCommand<URI>(commandURI, createUndo(commandURI, doc));
         this.undoableStack.push(newCommand);
     }
 
@@ -370,25 +344,21 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return a Set of URIs of the documents that were deleted.
      */
     public Set<URI> deleteAll(String keyword) {
-        Set<URI> deletedURIs = new HashSet<URI>();
-        Set<Document> documents = this.docTrie.deleteAll(keyword);
+        Set<URI> deletedURIs = this.docTrie.deleteAll(keyword);
+        List<URI> uris  = new ArrayList<URI>();
+        List<Document> docs = new ArrayList<Document>();
 
-        for (Document doc: documents) {
-            deletedURIs.add(doc.getKey());
-            for (String word: doc.getWords()) {
-                this.docTrie.delete(word, doc);
-            }
+        for (URI uri: deletedURIs) {
+            removeDocTrie(this.docStore.get(uri));
+            uris.add(uri);
+            docs.add(this.docStore.get(uri));
         }
 
-
-        addCommandSet(deletedURIs);
+        addCommandSet(uris, docs);
 
         for(URI uri: deletedURIs) {
             this.docStore.put(uri, null);
-        }
-        
-        for (Document doc: documents) {
-            removeHeapDoc(doc);
+            removeHeapDoc(uri);
         }
 
         return deletedURIs;
@@ -401,26 +371,23 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return a Set of URIs of the documents that were deleted.
      */
     public Set<URI> deleteAllWithPrefix(String keywordPrefix) {
-        Set<URI> deletedURIs = new HashSet<URI>();
-        Set<Document> documents = this.docTrie.deleteAllWithPrefix(keywordPrefix);
+        Set<URI> deletedURIs = this.docTrie.deleteAllWithPrefix(keywordPrefix);
+        List<URI> uris  = new ArrayList<URI>();
+        List<Document> docs = new ArrayList<Document>();
 
-        for (Document doc: documents) {
-            deletedURIs.add(doc.getKey());
-            for (String word: doc.getWords()) {
-                this.docTrie.delete(word, doc);
-            }
+        for (URI uri: deletedURIs) {
+            removeDocTrie(this.docStore.get(uri));
+            uris.add(uri);
+            docs.add(this.docStore.get(uri));
         }
 
-        addCommandSet(deletedURIs);
+        addCommandSet(uris, docs);
 
         for(URI uri: deletedURIs) {
             this.docStore.put(uri, null);
+            removeHeapDoc(uri);
         }
 
-        for (Document doc: documents) {
-            removeHeapDoc(doc);
-        }
-        
         return deletedURIs;
     }
 
@@ -480,6 +447,12 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
+    private void removeDocTrie(Document doc) {
+        for(String word: doc.getWords()) {
+            this.docTrie.delete(word, doc.getKey());
+        }
+    }
+
     private void putDocHeap(Document doc) {
         if (doc == null) {
             return;
@@ -494,7 +467,7 @@ public class DocumentStoreImpl implements DocumentStore {
         
         this.docCount++;
         this.docBytes += bytes;
-        this.docHeap.insert(new URIUseTimeComparator(doc.getKey()));
+        this.docHeap.insert(new URIUseTimeComparator(doc.getKey(), doc.getLastUseTime()));
         this.docsInMemURIs.add(doc.getKey());
     }
 
@@ -506,11 +479,15 @@ public class DocumentStoreImpl implements DocumentStore {
     private void removeHeapDoc(URI uri) {
         Document doc = this.docStore.get(uri);
         doc.setLastUseTime(0);
-        docHeap.reHeapify(new URIUseTimeComparator(uri));
+        docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
         docHeap.remove();
-        this.docStore.moveToDisk(uri);
+        try {
+            this.docStore.moveToDisk(uri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.docsInMemURIs.remove(uri);
     }
 
@@ -518,7 +495,11 @@ public class DocumentStoreImpl implements DocumentStore {
         if (this.docsInMemURIs.contains(uri)) {
             return;
         }
-        docStore.moveToDisk(uri);
+        try {
+            docStore.moveToDisk(uri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void enforceLimits() {
