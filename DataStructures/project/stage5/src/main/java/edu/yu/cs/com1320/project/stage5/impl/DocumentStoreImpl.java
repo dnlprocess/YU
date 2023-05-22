@@ -25,40 +25,55 @@ import java.util.function.Function;
 
 
 public class DocumentStoreImpl implements DocumentStore {
-    private class URIComparator implements Comparator<URI> {
+    /**
+     * Compares 
+     */
+    private class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
+        private final URI uri;
+        private long lastUseTime;
+
+        public URIUseTimeComparator(URI uri, long lastUseTime) {
+            this.uri = uri;
+            this.lastUseTime = lastUseTime;
+        }
+
+        @Override
+        public int compareTo(URIUseTimeComparator otherURI) {
+            return (int) (docStore.get(this.uri).getLastUseTime() - docStore.get(otherURI.uri).getLastUseTime());
+        }
 
     }
 
-    private class DocumentComparator implements Comparator<Document> {
+    private class URIWordComparator implements Comparator<URI> {
         String word;
 
-        public DocumentComparator(String word) {
+        public URIWordComparator(String word) {
             this.word = word;
         }
-        public int compare(Document doc, Document otherDoc) {
-            return Integer.compare(doc.wordCount(word), otherDoc.wordCount(word));
+        public int compare(URI uri, URI otherURI) {
+            return Integer.compare(docStore.get(uri).wordCount(word), docStore.get(otherURI).wordCount(word));
         }
     }
 
-    private class DocumentPrefixComparator implements Comparator<Document> {
+    private class URIPrefixComparator implements Comparator<URI> {
         String prefix;
 
-        public DocumentPrefixComparator(String prefix) {
+        public URIPrefixComparator(String prefix) {
             this.prefix = prefix;
         }
 
-        public int compare(Document doc, Document otherDoc) {
-            int doc1PrefixCount = countPrefixOccurrences(doc);
-            int doc2PrefixCount = countPrefixOccurrences(otherDoc);
+        public int compare(URI uri, URI otherURI) {
+            int doc1PrefixCount = countPrefixOccurrences(uri);
+            int doc2PrefixCount = countPrefixOccurrences(otherURI);
     
             return Integer.compare(doc1PrefixCount, doc2PrefixCount);
         }
 
-        private int countPrefixOccurrences(Document doc) {
+        private int countPrefixOccurrences(URI uri) {
             int count = 0;
-            for (String word : doc.getWords()) {
+            for (String word : docStore.get(uri).getWords()) {
                 if (word.startsWith(this.prefix)) {
-                    count += doc.wordCount(word);
+                    count += docStore.get(uri).wordCount(word);
                 }
             }
             return count;
@@ -106,6 +121,10 @@ public class DocumentStoreImpl implements DocumentStore {
         if (doc != null) {
             doc.setLastUseTime(System.nanoTime());
             this.docHeap.reHeapify(uri);
+
+            if (!this.docsInMemUris.contains(uri)) {
+
+            }
         }
 
         return doc;

@@ -52,9 +52,4 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
         this.elements = tempElements;
     }
 
-    @Override
-    public int compareTo(E element) {
-
-    }
-    
 }
