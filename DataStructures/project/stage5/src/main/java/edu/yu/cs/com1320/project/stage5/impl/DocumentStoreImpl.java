@@ -15,6 +15,7 @@ import edu.yu.cs.com1320.project.impl.MinHeapImpl;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,9 +33,9 @@ public class DocumentStoreImpl implements DocumentStore {
         private final URI uri;
         private long lastUseTime;
 
-        public URIUseTimeComparator(URI uri, long lastUseTime) {
+        public URIUseTimeComparator(URI uri) {
             this.uri = uri;
-            this.lastUseTime = lastUseTime;
+            this.lastUseTime = docStore.get(uri).getLastUseTime();
         }
 
         @Override
@@ -42,6 +43,22 @@ public class DocumentStoreImpl implements DocumentStore {
             return (int) (docStore.get(this.uri).getLastUseTime() - docStore.get(otherURI.uri).getLastUseTime());
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if(this == obj) {
+                return true;
+            }
+
+            if(obj == null) {
+                return false;
+            }
+
+            if(getClass() != obj.getClass()) {
+                return false;
+            }
+            URIUseTimeComparator otherURI = (URIUseTimeComparator) obj;
+            return this.uri.equals(otherURI.uri);
+        }
     }
 
     private class URIWordComparator implements Comparator<URI> {
@@ -81,10 +98,11 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     private BTreeImpl<URI, Document> docStore;
-    private Set<URI> docsInMemUris;
+    private Set<URI> docsInMemURIs;
+    private Set<URI> docsFromDiskURIs;
     private StackImpl<Undoable> undoableStack;
     private TrieImpl<URI> docTrie;
-    private MinHeap<URI> docHeap;
+    private MinHeap<URIUseTimeComparator> docHeap;
     private DocumentPersistenceManager docPersistenceManager;
 
     private int docCount;
@@ -94,11 +112,13 @@ public class DocumentStoreImpl implements DocumentStore {
 
     public DocumentStoreImpl() {
         this.docStore = new BTreeImpl<URI, Document>();
-        this.docsInMemUris = new HashSet<URI>();
+        this.docsInMemURIs = new HashSet<URI>();
+        this.docsFromDiskURIs = new HashSet<URI>();
         this.undoableStack = new StackImpl<Undoable>();
         this.docTrie = new TrieImpl<URI>();
-        this.docHeap = new MinHeapImpl<URI>();
+        this.docHeap = new MinHeapImpl<URIUseTimeComparator>();
         this.docPersistenceManager = new DocumentPersistenceManager(null);
+        this.docStore.setPersistenceManager(docPersistenceManager);
 
         this.docCount = 0;
         this.docBytes = 0;
@@ -109,6 +129,7 @@ public class DocumentStoreImpl implements DocumentStore {
     public DocumentStoreImpl(File baseDir) {
         this();
         this.docPersistenceManager = new DocumentPersistenceManager(baseDir);
+        this.docStore.setPersistenceManager(docPersistenceManager);
     }
 
     /**
@@ -119,11 +140,13 @@ public class DocumentStoreImpl implements DocumentStore {
         Document doc = this.docStore.get(uri);
 
         if (doc != null) {
-            doc.setLastUseTime(System.nanoTime());
-            this.docHeap.reHeapify(uri);
-
-            if (!this.docsInMemUris.contains(uri)) {
-
+            if (!this.docsInMemURIs.contains(uri)) {//doc can either be under limits or above
+                putDocHeap(doc);
+                enforceLimits();
+            }
+            else {
+                doc.setLastUseTime(System.nanoTime());
+                this.docHeap.reHeapify(new URIUseTimeComparator(uri));
             }
         }
 
@@ -146,10 +169,10 @@ public class DocumentStoreImpl implements DocumentStore {
             throw new IllegalArgumentException();
         }
         
-        Document doc = input == null? null: format.equals(DocumentFormat.TXT)? (Document) new DocumentImpl(uri, toTXT(input)): (Document) new DocumentImpl(uri, input.readAllBytes());
+        Document doc = input == null? null: format.equals(DocumentFormat.TXT)? (Document) new DocumentImpl(uri, toTXT(input), null): (Document) new DocumentImpl(uri, input.readAllBytes());
         if (input != null) {
             input.close();
-            putDocHeap(uri, doc);
+            putDocHeap(uri);
         }
 
         addCommand(uri);
@@ -163,15 +186,6 @@ public class DocumentStoreImpl implements DocumentStore {
         removeHeapDoc(this.docStore.get(uri));
         putDocTrie(doc);
         return this.docStore.put(uri, doc).hashCode();
-    }
-
-    private void putDocTrie(Document doc) {
-        if (doc == null || doc.getDocumentTxt() == null) {
-            return;
-        }
-        for (String word: doc.getWords()) {
-            this.docTrie.put(word, doc);
-        }
     }
 
     /**
@@ -299,8 +313,6 @@ public class DocumentStoreImpl implements DocumentStore {
 
         entry.put(commandURI, this.docStore.get(commandURI));
 
-        this.archive.push(entry);
-
         GenericCommand<URI> newCommand = new GenericCommand<URI>(commandURI, createUndo(commandURI));
         this.undoableStack.push(newCommand);
     }
@@ -321,15 +333,15 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return a List of the matches. If there are no matches, return an empty list.
      */
     public List<Document> search(String keyword) {
-        DocumentComparator searchComparator = new DocumentComparator(keyword);
-        List<Document> documents = this.docTrie.getAllSorted(keyword, searchComparator);
+        URIWordComparator searchComparator = new URIWordComparator(keyword);
+        List<URI> uris = this.docTrie.getAllSorted(keyword, searchComparator);
+        List<Document> docs = new ArrayList<Document>();
 
-        for (Document doc: documents) {
-            doc.setLastUseTime(System.nanoTime());
-            this.docHeap.reHeapify(doc);
+        for (URI uri: uris) {
+            docs.add(get(uri));
         }
 
-        return documents;
+        return docs;
     }
 
     /**
@@ -340,15 +352,15 @@ public class DocumentStoreImpl implements DocumentStore {
      * @return a List of the matches. If there are no matches, return an empty list.
      */
     public List<Document> searchByPrefix(String keywordPrefix) {
-        DocumentPrefixComparator prefixComparator = new DocumentPrefixComparator(keywordPrefix);
-        List<Document> documents = this.docTrie.getAllWithPrefixSorted(keywordPrefix, prefixComparator);
-        
-        for (Document doc: documents) {
-            doc.setLastUseTime(System.nanoTime());
-            this.docHeap.reHeapify(doc);
+        URIPrefixComparator prefixComparator = new URIPrefixComparator(keywordPrefix);
+        List<URI> uris = this.docTrie.getAllWithPrefixSorted(keywordPrefix, prefixComparator);
+        List<Document> docs = new ArrayList<Document>();
+
+        for (URI uri: uris) {
+            docs.add(get(uri));
         }
 
-        return documents;
+        return docs;
     }
 
     /**
@@ -434,19 +446,6 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    private void removeHeapDoc() {
-        Document doc = this.docHeap.remove();
-        this.docCount--;
-        this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
-        URI uri = doc.getKey();
-
-        this.docStore.put(uri, null);
-        for (String word: doc.getWords()) this.docTrie.delete(word, doc);
-
-        removeArchive(uri);
-        removeStack(uri);
-    }
-
     @SuppressWarnings("unchecked")
     private void removeStack(URI uri) {
         StackImpl<Undoable> tempStack = new StackImpl<Undoable>();
@@ -472,28 +471,20 @@ public class DocumentStoreImpl implements DocumentStore {
         for (int i=0; i<tempStack.size(); i++) this.undoableStack.push(tempStack.pop());
     }
 
-    private void removeArchive(URI uri) {
-        StackImpl<HashMap<URI, Document>> tempArchive = new StackImpl<HashMap<URI, Document>>();
-        for (int i=0; i<archive.size(); i++) {
-            if (archive.peek().containsKey(uri)) {
-                archive.peek().remove(uri);
-                if (archive.peek().isEmpty()) archive.pop(); //normally would pop, now only pop if it is empty
-                else tempArchive.push(archive.pop());
-                break;
-            }
-            tempArchive.push(archive.pop());
+    private void putDocTrie(Document doc) {
+        if (doc == null || doc.getDocumentTxt() == null) {
+            return;
         }
-        for (int i=0; i<tempArchive.size(); i++) this.archive.push(tempArchive.pop());
+        for (String word: doc.getWords()) {
+            this.docTrie.put(word, doc.getKey());
+        }
     }
 
-    private void putDocHeap(URI uri, Document doc) {
+    private void putDocHeap(Document doc) {
         if (doc == null) {
             return;
         }
         int bytes = doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
-        if (bytes > this.maxDocBytes) {
-            throw new IllegalArgumentException();
-        }
 
         doc.setLastUseTime(System.nanoTime());
 
@@ -503,14 +494,37 @@ public class DocumentStoreImpl implements DocumentStore {
         
         this.docCount++;
         this.docBytes += bytes;
-        this.docHeap.insert(doc);
+        this.docHeap.insert(new URIUseTimeComparator(doc.getKey()));
+        this.docsInMemURIs.add(doc.getKey());
     }
 
-    private void removeHeapDoc(Document doc) {
+    private void removeHeapDoc() {
+        URI uri = this.docHeap.remove().uri;
+        removeHeapDoc(uri);
+    }
+
+    private void removeHeapDoc(URI uri) {
+        Document doc = this.docStore.get(uri);
         doc.setLastUseTime(0);
-        docHeap.reHeapify(doc);
+        docHeap.reHeapify(new URIUseTimeComparator(uri));
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
         docHeap.remove();
+        this.docStore.moveToDisk(uri);
+        this.docsInMemURIs.remove(uri);
+    }
+
+    private void moveToDisk(URI uri) {
+        if (this.docsInMemURIs.contains(uri)) {
+            return;
+        }
+        docStore.moveToDisk(uri);
+    }
+
+    private void enforceLimits() {
+        while (this.docBytes > this.maxDocBytes || this.docCount > maxDocCount) {
+
+            removeHeapDoc();
+        }
     }
 }
