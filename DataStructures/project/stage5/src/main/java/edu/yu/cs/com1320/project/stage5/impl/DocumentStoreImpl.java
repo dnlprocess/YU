@@ -5,7 +5,6 @@ import edu.yu.cs.com1320.project.stage5.Document;
 import edu.yu.cs.com1320.project.GenericCommand;
 import edu.yu.cs.com1320.project.CommandSet;
 import edu.yu.cs.com1320.project.impl.BTreeImpl;
-import edu.yu.cs.com1320.project.impl.HashTableImpl;
 import edu.yu.cs.com1320.project.impl.StackImpl;
 import edu.yu.cs.com1320.project.impl.TrieImpl;
 import edu.yu.cs.com1320.project.Undoable;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +39,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
         @Override
         public int compareTo(URIUseTimeComparator otherURI) {
-            return (int) (docStore.get(this.uri).getLastUseTime() - docStore.get(otherURI.uri).getLastUseTime());
+            return (int) (this.lastUseTime - otherURI.lastUseTime);
         }
 
         @Override
