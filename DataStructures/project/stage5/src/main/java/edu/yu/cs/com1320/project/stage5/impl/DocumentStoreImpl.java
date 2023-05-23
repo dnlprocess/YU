@@ -464,8 +464,12 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     private void removeHeapDoc() {
+        
         URI uri = this.docHeap.remove().uri;
         Document doc = this.docStore.get(uri);
+        if (!this.docsInMemURIs.contains(uri)) {
+            return;
+        }
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
         try {
