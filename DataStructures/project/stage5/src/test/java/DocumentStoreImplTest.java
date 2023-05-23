@@ -376,8 +376,6 @@ public class DocumentStoreImplTest {
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
         doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
-        
-        
         uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
@@ -413,6 +411,7 @@ public class DocumentStoreImplTest {
         assertEquals(7, docs.size());
         assertEquals(doc1, store.get(uri1));
         assertEquals(doc1.getWords(), store.get(uri1).getWords());
+        
         
         store.deleteAllWithPrefix("t");
             docs = store.searchByPrefix("t");

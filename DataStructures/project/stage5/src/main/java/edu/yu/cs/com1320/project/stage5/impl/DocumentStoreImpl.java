@@ -171,7 +171,6 @@ public class DocumentStoreImpl implements DocumentStore {
         Document doc = input == null? null: format.equals(DocumentFormat.TXT)? (Document) new DocumentImpl(uri, toTXT(input), null): (Document) new DocumentImpl(uri, input.readAllBytes());
         if (input != null) {
             input.close();
-            putDocHeap(doc);
         }
 
         addCommand(uri, docStore.get(uri));
@@ -180,6 +179,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
         if (this.docStore.get(uri) == null) {
             putDocTrie(doc);
+            putDocHeap(doc);
             this.docStore.put(uri, doc);
             return result;
         }
@@ -190,6 +190,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
         result = this.docStore.put(uri, doc).hashCode();
 
+        putDocHeap(doc);
         enforceLimits();
 
         return result;
@@ -287,11 +288,8 @@ public class DocumentStoreImpl implements DocumentStore {
     private void addCommandSet(List<URI> commandURIs, List<Document> docs) {
         CommandSet<URI> newCommandSet = new CommandSet<URI>();
 
-        Iterator<URI> uriIterator = commandURIs.iterator();
-        Iterator<Document> docIterator = docs.iterator();
-
-        while (uriIterator.hasNext() && docIterator.hasNext()) {
-            newCommandSet.addCommand(new GenericCommand<URI>(uriIterator.next(), createUndo(uriIterator.next(), docIterator.next())));
+        for (int i=0; i<commandURIs.size(); i++) {
+            newCommandSet.addCommand(new GenericCommand<URI>(commandURIs.get(i), createUndo(commandURIs.get(i), docs.get(i))));
         }
 
         this.undoableStack.push(newCommandSet);
@@ -400,7 +398,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
         addCommandSet(uris, docs);
 
-        for(URI uri: deletedURIs) {
+        for(URI uri: uris) {
             removeHeapDoc(uri);
             this.docStore.put(uri, null);
         }
@@ -480,15 +478,15 @@ public class DocumentStoreImpl implements DocumentStore {
 
     private void removeHeapDoc(URI uri) {
         Document doc = this.docStore.get(uri);
-        doc.setLastUseTime(0);
 
         if (!this.docsInMemURIs.contains(uri)) {
             return;
         }
-        docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
+        doc.setLastUseTime(0);
+        this.docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
+        docHeap.remove();
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
-        docHeap.remove();
         try {
             this.docStore.moveToDisk(uri);
         } catch (Exception e) {

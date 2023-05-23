@@ -30,7 +30,7 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
     /**
      * get the index of the element within the array. If it is not present throw NoSuchElementException
      */
-    protected int getArrayIndex(E element) {
+    protected int getArrayIndex(E element) {// fix_______________
         for (int i=1; i<=this.count; i++) {
             if (this.elements[i].equals(element)) {
                 return i;
