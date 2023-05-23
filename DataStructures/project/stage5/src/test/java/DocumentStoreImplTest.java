@@ -566,7 +566,7 @@ public class DocumentStoreImplTest {
         assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(true, documentStore.delete(uri6));
         //assertEquals(uri4, documentStore.get(uri4).getKey());
-        //assertEquals(true, documentStore.delete(uri4));
+        assertEquals(true, documentStore.delete(uri4));
         documentStore.delete(uri5);
         documentStore.delete(uri3);
         documentStore.delete(uri1);

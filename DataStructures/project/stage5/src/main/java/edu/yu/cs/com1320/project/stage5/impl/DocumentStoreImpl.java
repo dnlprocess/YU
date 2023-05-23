@@ -210,8 +210,8 @@ public class DocumentStoreImpl implements DocumentStore {
 
         addCommand(uri, doc);
 
-        this.docStore.put(uri, null);
         removeHeapDoc(uri);
+        this.docStore.put(uri, null);
 
         enforceLimits();
         
@@ -372,8 +372,8 @@ public class DocumentStoreImpl implements DocumentStore {
         addCommandSet(uris, docs);
 
         for(URI uri: deletedURIs) {
-            this.docStore.put(uri, null);
             removeHeapDoc(uri);
+            this.docStore.put(uri, null);
         }
 
         enforceLimits();
@@ -401,8 +401,8 @@ public class DocumentStoreImpl implements DocumentStore {
         addCommandSet(uris, docs);
 
         for(URI uri: deletedURIs) {
-            this.docStore.put(uri, null);
             removeHeapDoc(uri);
+            this.docStore.put(uri, null);
         }
 
         enforceLimits();
@@ -482,6 +482,10 @@ public class DocumentStoreImpl implements DocumentStore {
     private void removeHeapDoc(URI uri) {
         Document doc = this.docStore.get(uri);
         doc.setLastUseTime(0);
+
+        if (!this.docsInMemURIs.contains(uri)) {
+            return;
+        }
         docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
