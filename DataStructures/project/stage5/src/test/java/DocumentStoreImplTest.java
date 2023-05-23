@@ -660,7 +660,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSetMaxDocumentCount() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImpl();
+        DocumentStoreImpl documentStore = new DocumentStoreImpl();
         // add some documents to the store
         String[] texts = {"Document 1", "Document 2", "Document 3", "Document 4"};
         URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
@@ -672,7 +672,6 @@ public class DocumentStoreImplTest {
         // set max document count to 3
         assertEquals(texts[0], documentStore.get(uris[0]).getDocumentTxt());
         documentStore.setMaxDocumentCount(3);
-
         // add another document
         String text = "Document 5";
         URI uri = new URI("https://URI5");
