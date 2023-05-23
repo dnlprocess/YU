@@ -470,7 +470,6 @@ public class DocumentStoreImpl implements DocumentStore {
         Document doc = this.docStore.get(uri);
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
-        docHeap.remove();
         try {
             this.docStore.moveToDisk(uri);
         } catch (Exception e) {
