@@ -96,7 +96,7 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    public BTreeImpl<URI, Document> docStore; //fix______________________________________________
+    private BTreeImpl<URI, Document> docStore; //fix______________________________________________
     private Set<URI> docsInMemURIs;
     private Set<URI> docsFromDiskURIs;
     private StackImpl<Undoable> undoableStack;

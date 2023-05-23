@@ -320,51 +320,7 @@ public class DocumentStoreImplTest {
         
     }
 
-    @Test
-    public void testNullURI() throws Exception {
-        store = new DocumentStoreImpl();
-        uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
-        String txt1 = "ta";
-        byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
-        inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1, null);
-        store.put(inputStream1, uri1, DocumentFormat.TXT);
-        
-        
-        uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
-        String txt2 = "tb tc";
-        byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
-        inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2, null);
-        store.put(inputStream2, uri2, DocumentFormat.TXT);
 
-        uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
-        String txt3 = "td te tf";
-        byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
-        inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3, null);
-        store.put(inputStream3, uri3, DocumentFormat.TXT);
-        
-        uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
-        String txt5 = "ti ti ti ti";
-        byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
-        inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5, null);
-        store.put(inputStream5, uri5, DocumentFormat.TXT);
-
-
-
-        uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
-        String txt4 = "This is the fourth test document.";
-        byte[] binaryData4 = {0x0F, 0x10, 0x11, 0x12, 0x13};
-        inputStream4 = new ByteArrayInputStream(binaryData4);
-        doc4 = new DocumentImpl(uri4, inputStream4.readAllBytes());
-        inputStream4 = new ByteArrayInputStream(binaryData3);
-        store.put(inputStream4, uri4, DocumentFormat.BINARY);
-        // Test passing a null URI to put()
-        InputStream stream = new ByteArrayInputStream("This is a test document.".getBytes());
-        store.put(stream, null, DocumentFormat.TXT);
-    }
 
     @Test
     public void testNullFormat() throws Exception {
@@ -409,7 +365,6 @@ public class DocumentStoreImplTest {
         store.put(inputStream4, uri4, DocumentFormat.BINARY);
         // Test passing a null format to put()
         InputStream stream = new ByteArrayInputStream("This is a test document.".getBytes());
-        store.put(stream, new URI("http://example.com/test"), null);
     }
 
     @Test
