@@ -1,6 +1,6 @@
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 
 import edu.yu.cs.com1320.project.impl.StackImpl;
 

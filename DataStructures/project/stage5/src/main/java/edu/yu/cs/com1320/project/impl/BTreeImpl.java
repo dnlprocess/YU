@@ -69,7 +69,7 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
             this.key = key;
             this.val = val;
             this.child = child;
-            this.inMemory = false;
+            this.inMemory = true;
         }
         public Object getValue()
         {
@@ -110,36 +110,26 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
         return null;
     }
 
-    private Entry get(Node currentNode, Key key, int height)
-    {
+    private Entry get(Node<Key, Value> currentNode, Key key, int height) {
         Entry[] entries = currentNode.entries;
 
         //current node is external (i.e. height == 0)
-        if (height == 0)
-        {
-            for (int j = 0; j < currentNode.entryCount; j++)
-            {
-                if(isEqual(key, entries[j].key))
-                {
+        if (height == 0) {
+            for (int j = 0; j < currentNode.entryCount; j++) {
+                if(isEqual(key, entries[j].key)) {
                     //found desired key. Return its value
                     return entries[j];
                 }
             }
             //didn't find the key
             return null;
-        }
-
-        //current node is internal (height > 0)
-        else
-        {
-            for (int j = 0; j < currentNode.entryCount; j++)
-            {
+        } else {  //current node is internal (height > 0)
+            for (int j = 0; j < currentNode.entryCount; j++) {
                 //if (we are at the last key in this node OR the key we
                 //are looking for is less than the next key, i.e. the
                 //desired key must be in the subtree below the current entry),
                 //then recurse into the current entry’s child
-                if (j + 1 == currentNode.entryCount || less(key, entries[j + 1].key))
-                {
+                if (j + 1 == currentNode.entryCount || less(key, entries[j + 1].key)) {
                     return this.get(entries[j].child, key, height - 1);
                 }
             }
@@ -151,10 +141,7 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
     @Override
     @SuppressWarnings("unchecked")
     public Value put(Key k, Value v) {
-        if (k == null)
-        {
-            throw new IllegalArgumentException("argument key to put() is null");
-        }
+        if (k == null) throw new IllegalArgumentException("argument key to put() is null");
         //if the key already exists in the b-tree, simply replace the value
         Entry alreadyThere = this.get(this.root, k, this.height);
         if(alreadyThere != null) {
@@ -168,10 +155,7 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
 
         Node newNode = this.put(this.root, k, v, this.height);
         this.n++;
-        if (newNode == null)
-        {
-            return null;
-        }
+        if (newNode == null) return null;
 
         //split the root:
         //Create a new node to be the root.
@@ -195,48 +179,23 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
      * @param height
      * @return null if no new node was created (i.e. just added a new Entry into an existing node). If a new node was created due to the need to split, returns the new node
      */
-    private Node put(Node currentNode, Key key, Value val, int height)
-    {
+    private Node put(Node currentNode, Key key, Value val, int height) {
         int j;
         Entry newEntry = new Entry(key, val, null);
-
-        //external node
-        if (height == 0)
-        {
-            //find index in currentNode’s entry[] to insert new entry
-            //we look for key < entry.key since we want to leave j
-            //pointing to the slot to insert the new entry, hence we want to find
-            //the first entry in the current node that key is LESS THAN
-            for (j = 0; j < currentNode.entryCount; j++)
-            {
-                if (less(key, currentNode.entries[j].key))
-                {
-                    break;
-                }
+        if (height == 0) {
+            for (j = 0; j < currentNode.entryCount; j++) {
+                if (less(key, currentNode.entries[j].key)) {  break; }
             }
         }
-
         // internal node
-        else
-        {
-            //find index in node entry array to insert the new entry
-            for (j = 0; j < currentNode.entryCount; j++)
-            {
-                //if (we are at the last key in this node OR the key we
-                //are looking for is less than the next key, i.e. the
-                //desired key must be added to the subtree below the current entry),
-                //then do a recursive call to put on the current entry’s child
-                if ((j + 1 == currentNode.entryCount) || less(key, currentNode.entries[j + 1].key))
-                {
-                    //increment j (j++) after the call so that a new entry created by a split
-                    //will be inserted in the next slot
+        else {
+            // find index in node entry array to insert the new entry
+            for (j = 0; j < currentNode.entryCount; j++) {
+                if ((j + 1 == currentNode.entryCount) || less(key, currentNode.entries[j + 1].key)) {
+                    // increment j (j++) after the call so that a new entry created by a split
+                    // will be inserted in the next slot
                     Node newNode = this.put(currentNode.entries[j++].child, key, val, height - 1);
-                    if (newNode == null)
-                    {
-                        return null;
-                    }
-                    //if the call to put returned a node, it means I need to add a new entry to
-                    //the current node
+                    if (newNode == null) { return null; }
                     newEntry.key = newNode.entries[0].key;
                     newEntry.val = null;
                     newEntry.child = newNode;
@@ -244,27 +203,13 @@ public class BTreeImpl<Key extends Comparable<Key>, Value> implements BTree<Key,
                 }
             }
         }
-        //shift entries over one place to make room for new entry
-        for (int i = currentNode.entryCount; i > j; i--)
-        {
-            currentNode.entries[i] = currentNode.entries[i - 1];
-        }
-        //add new entry
+        // shift entries over one place to make room for new entry
+        for (int i = currentNode.entryCount; i > j; i--) { currentNode.entries[i] = currentNode.entries[i - 1]; }
+        // add new entry
         currentNode.entries[j] = newEntry;
         currentNode.entryCount++;
-        if (currentNode.entryCount < BTreeImpl.MAX)
-        {
-            //no structural changes needed in the tree
-            //so just return null
-            return null;
-        }
-        else
-        {
-            //will have to create new entry in the parent due
-            //to the split, so return the new node, which is
-            //the node for which the new entry will be created
-            return this.split(currentNode, height);
-        }
+        if (currentNode.entryCount < BTreeImpl.MAX) { return null; }
+         else { return this.split(currentNode, height); }
     }
 
     /**

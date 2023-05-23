@@ -1,12 +1,13 @@
 import edu.yu.cs.com1320.project.CommandSet;
 import edu.yu.cs.com1320.project.GenericCommand;
-import edu.yu.cs.com1320.project.stage4.Document;
-import edu.yu.cs.com1320.project.stage4.DocumentStore;
-import edu.yu.cs.com1320.project.stage4.DocumentStore.DocumentFormat;
-import edu.yu.cs.com1320.project.stage4.impl.DocumentStoreImpl;
-import edu.yu.cs.com1320.project.stage4.impl.DocumentImpl;
-import org.junit.Before;
-import org.junit.Test;
+import edu.yu.cs.com1320.project.stage5.Document;
+import edu.yu.cs.com1320.project.stage5.DocumentStore;
+import edu.yu.cs.com1320.project.stage5.DocumentStore.DocumentFormat;
+import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl;
+import edu.yu.cs.com1320.project.stage5.impl.DocumentImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,8 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 
 public class DocumentStoreImplTest {
 
-    private DocumentStoreImplOld store;
+    private DocumentStoreImpl store;
     private URI uri1, uri2, uri3, uri4, uri5;
     private Document doc1, doc2, doc3, doc4, doc5;
     private InputStream inputStream1, inputStream2, inputStream3, inputStream4, inputStream5;
@@ -76,12 +75,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testPutAndGetTxtDocument() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -89,21 +88,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -128,12 +127,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testPutAndGetBinaryDocument() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -141,21 +140,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -180,12 +179,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testDelete() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -193,21 +192,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -231,12 +230,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearch1() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -244,21 +243,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc This";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -266,7 +265,7 @@ public class DocumentStoreImplTest {
         uri4 = new URI("http://edu.yu.cs/com1320/project/doc4");
         String txt4 = "This is the fourth test document.";
         InputStream inputStream = new ByteArrayInputStream(txt4.getBytes());
-        doc4 = new DocumentImpl(uri4, txt4);
+        doc4 = new DocumentImpl(uri4, txt4, null);
         store.put(inputStream, uri4, DocumentFormat.TXT);
         // Test searching for documents
         List<Document> result = store.search("This");
@@ -277,12 +276,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testNullInputStream() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -290,21 +289,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -321,14 +320,14 @@ public class DocumentStoreImplTest {
         
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullURI() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -336,21 +335,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -367,14 +366,14 @@ public class DocumentStoreImplTest {
         store.put(stream, null, DocumentFormat.TXT);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullFormat() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -382,21 +381,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -415,12 +414,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testTrie() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -428,21 +427,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -474,12 +473,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearchOrder() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "tz";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -487,21 +486,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti td tg tm to";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -522,12 +521,12 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndo1() throws Exception {
-        store = new DocumentStoreImplOld();
+        store = new DocumentStoreImpl();
         uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         String txt1 = "ta";
         byte[] binaryData1 = {0x00, 0x01, 0x02, 0x03, 0x04};
         inputStream1 = new ByteArrayInputStream(txt1.getBytes());
-        doc1 = new DocumentImpl(uri1, txt1);
+        doc1 = new DocumentImpl(uri1, txt1, null);
         store.put(inputStream1, uri1, DocumentFormat.TXT);
         
         
@@ -535,21 +534,21 @@ public class DocumentStoreImplTest {
         String txt2 = "tb tc";
         byte[] binaryData2 = {0x05, 0x06, 0x07, 0x08, 0x09};
         inputStream2 = new ByteArrayInputStream(txt2.getBytes());
-        doc2 = new DocumentImpl(uri2, txt2);
+        doc2 = new DocumentImpl(uri2, txt2, null);
         store.put(inputStream2, uri2, DocumentFormat.TXT);
 
         uri3 = new URI("http://edu.yu.cs/com1320/project/doc3");
         String txt3 = "td te tf";
         byte[] binaryData3 = {0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
         inputStream3 = new ByteArrayInputStream(txt3.getBytes());
-        doc3 = new DocumentImpl(uri3, txt3);
+        doc3 = new DocumentImpl(uri3, txt3, null);
         store.put(inputStream3, uri3, DocumentFormat.TXT);
         
         uri5 = new URI("http://edu.yu.cs/com1320/project/doc5");
         String txt5 = "ti ti ti ti";
         byte[] binaryData5 = {0x14, 0x15, 0x16, 0x17, 0x18};
         inputStream5 = new ByteArrayInputStream(txt5.getBytes());
-        doc5 = new DocumentImpl(uri5, txt5);
+        doc5 = new DocumentImpl(uri5, txt5, null);
         store.put(inputStream5, uri5, DocumentFormat.TXT);
 
 
@@ -574,7 +573,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndoMostRecentWhenMostRecentDeletedMultipleDocuments() throws Exception {
-        DocumentStoreImplOld documentStore = new DocumentStoreImplOld();
+        DocumentStoreImpl documentStore = new DocumentStoreImpl();
         /*URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
         URI uri2 = new URI("http://edu.yu.cs/com1320/2");
         URI uri3 = new URI("http://edu.yu.cs/com1320/project/3");
@@ -651,7 +650,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testUndo() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImplOld();
+        DocumentStore documentStore = new DocumentStoreImpl();
         // add a document to the store
         URI uri1 = new URI("AAAAA");
         String text = "Hello, world!";
@@ -671,14 +670,14 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSearch() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImplOld();
+        DocumentStore documentStore = new DocumentStoreImpl();
         // add some documents to the store
         String[] texts = {"Hello, world!", "Goodbye, world word world", "The quick brown fox jumps over the lazy dog.", "The early bird catches the worm"};
         URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
         List<Document> documents = new ArrayList<>();
         for (int i=0; i<texts.length; i++) {
             InputStream inputStream = new ByteArrayInputStream(texts[i].getBytes());
-            Document doc = new DocumentImpl(uris[i], texts[i]);
+            Document doc = new DocumentImpl(uris[i], texts[i], null);
             documents.add(doc);
             documentStore.put(inputStream, uris[i], DocumentFormat.TXT);
         }
@@ -706,7 +705,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSetMaxDocumentCount() throws Exception {
-        DocumentStore documentStore = new DocumentStoreImplOld();
+        DocumentStore documentStore = new DocumentStoreImpl();
         // add some documents to the store
         String[] texts = {"Document 1", "Document 2", "Document 3", "Document 4"};
         URI[] uris = {new URI("https://URI1"), new URI("https://URI2"), new URI("https://URI3"), new URI("https://URI4")};
@@ -716,6 +715,7 @@ public class DocumentStoreImplTest {
         }
 
         // set max document count to 3
+        assertEquals(texts[0], documentStore.get(uris[0]).getDocumentTxt());
         documentStore.setMaxDocumentCount(3);
 
         // add another document
@@ -723,13 +723,13 @@ public class DocumentStoreImplTest {
         URI uri = new URI("https://URI5");
         InputStream inputStream = new ByteArrayInputStream(text.getBytes());
         documentStore.put(inputStream, uri, DocumentFormat.TXT);
-        Document document = new DocumentImpl(uri, text);
+        Document document = new DocumentImpl(uri, text, null);
 
         // check that the first document was removed
         List<Document> allDocuments = documentStore.search("Document");
         assertEquals(3, allDocuments.size());
         assertTrue(allDocuments.contains(document));
-        assertFalse(allDocuments.contains(new DocumentImpl(uris[0], texts[0])));
+        assertFalse(allDocuments.contains(new DocumentImpl(uris[0], texts[0], null)));
         assertNull(documentStore.get(uris[0]));
         assertNull(documentStore.get(uris[1]));
         assertNotNull(documentStore.get(uris[2]));
@@ -737,7 +737,7 @@ public class DocumentStoreImplTest {
 
     @Test
     public void testSetMaxDocumentBytes() throws IOException {
-        DocumentStore documentStore = new DocumentStoreImplOld();
+        DocumentStore documentStore = new DocumentStoreImpl();
         // add some documents to the store
         String[] texts = {"This is a"};
     }

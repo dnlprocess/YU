@@ -96,7 +96,7 @@ public class DocumentStoreImpl implements DocumentStore {
         }
     }
 
-    private BTreeImpl<URI, Document> docStore;
+    public BTreeImpl<URI, Document> docStore; //fix______________________________________________
     private Set<URI> docsInMemURIs;
     private Set<URI> docsFromDiskURIs;
     private StackImpl<Undoable> undoableStack;
@@ -176,16 +176,23 @@ public class DocumentStoreImpl implements DocumentStore {
 
         addCommand(uri, docStore.get(uri));
 
+        int result = 0;
+
         if (this.docStore.get(uri) == null) {
             putDocTrie(doc);
             this.docStore.put(uri, doc);
-            return 0;
+            return result;
         }
 
         removeHeapDoc(uri);
         removeDocTrie(this.docStore.get(uri));
         putDocTrie(doc);
-        return this.docStore.put(uri, doc).hashCode();
+
+        result = this.docStore.put(uri, doc).hashCode();
+
+        enforceLimits();
+
+        return result;
     }
 
     /**
@@ -205,6 +212,8 @@ public class DocumentStoreImpl implements DocumentStore {
 
         this.docStore.put(uri, null);
         removeHeapDoc(uri);
+
+        enforceLimits();
         
         return true;
     }
@@ -257,7 +266,8 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     private Function<URI,Boolean> createUndo(URI commandURI, Document undoDoc) {
-        Document doc = undoDoc.getDocumentBinaryData() == null? new DocumentImpl(commandURI, undoDoc.getDocumentTxt(), undoDoc.getWordMap()): new DocumentImpl(commandURI, undoDoc.getDocumentBinaryData());
+
+        Document doc = undoDoc == null? null: undoDoc.getDocumentBinaryData() == null? new DocumentImpl(commandURI, undoDoc.getDocumentTxt(), undoDoc.getWordMap()): new DocumentImpl(commandURI, undoDoc.getDocumentBinaryData());
         
         Function<URI, Boolean> undo = (URI uri) -> {
             if (this.docStore.get(uri) != null) {
@@ -316,6 +326,8 @@ public class DocumentStoreImpl implements DocumentStore {
             docs.add(get(uri));
         }
 
+        enforceLimits();
+
         return docs;
     }
 
@@ -334,6 +346,8 @@ public class DocumentStoreImpl implements DocumentStore {
         for (URI uri: uris) {
             docs.add(get(uri));
         }
+
+        enforceLimits();
 
         return docs;
     }
@@ -362,6 +376,8 @@ public class DocumentStoreImpl implements DocumentStore {
             removeHeapDoc(uri);
         }
 
+        enforceLimits();
+
         return deletedURIs;
     }
 
@@ -388,6 +404,8 @@ public class DocumentStoreImpl implements DocumentStore {
             this.docStore.put(uri, null);
             removeHeapDoc(uri);
         }
+
+        enforceLimits();
 
         return deletedURIs;
     }
@@ -454,6 +472,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
     private void removeHeapDoc(URI uri) {
         Document doc = this.docStore.get(uri);
+        if (doc == null);
         doc.setLastUseTime(0);
         docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
         this.docCount--;

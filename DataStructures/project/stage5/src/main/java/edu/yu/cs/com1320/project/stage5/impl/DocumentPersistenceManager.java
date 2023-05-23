@@ -38,6 +38,10 @@ public class DocumentPersistenceManager implements PersistenceManager<URI, Docum
 
     @Override
     public void serialize(URI uri, Document val) throws IOException {
+        if (uri == null) {
+            throw new IllegalArgumentException();
+        }
+
         String path = getFilePath(uri);
         File file = new File(path);
         createPathDirectories(file);
@@ -50,6 +54,10 @@ public class DocumentPersistenceManager implements PersistenceManager<URI, Docum
 
     @Override
     public Document deserialize(URI uri) throws IOException {
+        if (uri == null) {
+            throw new IllegalArgumentException();
+        }
+        
         String path = getFilePath(uri);
         File file = new File(path);
 

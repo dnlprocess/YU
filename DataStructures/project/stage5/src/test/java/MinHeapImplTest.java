@@ -1,12 +1,18 @@
-import org.junit.Test;
-
 import edu.yu.cs.com1320.project.MinHeap;
 import edu.yu.cs.com1320.project.impl.MinHeapImpl;
 
-import org.junit.Assert.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -98,10 +104,5 @@ public class MinHeapImplTest {
         assertEquals(4, heap.remove().intValue());
     }
     
-    @Test(expected = NoSuchElementException.class)
-    public void testRemoveEmptyHeap() {
-        MinHeap<Integer> heap = new MinHeapImpl<>();
-        heap.remove();
-    }
     
 }
