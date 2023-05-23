@@ -4,6 +4,7 @@ import edu.yu.cs.com1320.project.stage5.Document;
 import edu.yu.cs.com1320.project.stage5.DocumentStore;
 import edu.yu.cs.com1320.project.stage5.DocumentStore.DocumentFormat;
 import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl;
+import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl.URIUseTimeComparator;
 import edu.yu.cs.com1320.project.stage5.impl.DocumentImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -545,13 +546,13 @@ public class DocumentStoreImplTest {
         String content6 = "1";
 
         // add all documents
-        assertEquals(0, documentStore.put(new ByteArrayInputStream(content6.getBytes()), uri6, DocumentStore.DocumentFormat.TXT));
+        assertEquals(0, documentStore.put(new ByteArrayInputStream(content1.getBytes()), uri1, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content2.getBytes()), uri2, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content3.getBytes()), uri3, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content4.getBytes()), uri4, DocumentStore.DocumentFormat.TXT));
-        assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content5.getBytes()), uri5, DocumentStore.DocumentFormat.TXT));
-        assertEquals(0, documentStore.put(new ByteArrayInputStream(content1.getBytes()), uri1, DocumentStore.DocumentFormat.TXT));
+        assertEquals(0, documentStore.put(new ByteArrayInputStream(content6.getBytes()), uri6, DocumentStore.DocumentFormat.TXT));
+        assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(uri2, documentStore.get(uri2).getKey());
 
 
@@ -560,8 +561,13 @@ public class DocumentStoreImplTest {
         assertEquals(uri4, documentStore.get(uri4).getKey());
         assertEquals(true, documentStore.delete(uri6));
         //assertEquals(uri4, documentStore.get(uri4).getKey());
-        assertEquals(true, documentStore.delete(uri4));
-        documentStore.delete(uri5);
+        
+        assertEquals(true, documentStore.delete(uri5));
+        documentStore.delete(uri4);
+
+        documentStore.docHeap.reHeapify(documentStore.new URIUseTimeComparator(uri3, 0));
+        assertEquals(1,documentStore.docHeap.getArrayIndex(documentStore.new URIUseTimeComparator(uri3, 0)));
+        
         documentStore.delete(uri3);
         documentStore.delete(uri1);
         //assertEquals(uri2, documentStore.get(uri2).getKey());

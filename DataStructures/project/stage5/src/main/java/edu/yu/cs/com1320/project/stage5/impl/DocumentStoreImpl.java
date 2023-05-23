@@ -28,7 +28,7 @@ public class DocumentStoreImpl implements DocumentStore {
     /**
      * Compares 
      */
-    private class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
+    public class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
         private URI uri;
         private long lastUseTime;
 
@@ -39,7 +39,7 @@ public class DocumentStoreImpl implements DocumentStore {
 
         @Override
         public int compareTo(URIUseTimeComparator otherURI) {
-            return (int) (this.lastUseTime - otherURI.lastUseTime);
+            return Integer.compare((int) otherURI.lastUseTime, (int) this.lastUseTime);
         }
 
         @Override
@@ -101,7 +101,7 @@ public class DocumentStoreImpl implements DocumentStore {
     private Set<URI> docsFromDiskURIs;
     private StackImpl<Undoable> undoableStack;
     private TrieImpl<URI> docTrie;
-    private MinHeapImpl<URIUseTimeComparator> docHeap;
+    public MinHeapImpl<URIUseTimeComparator> docHeap;
     private DocumentPersistenceManager docPersistenceManager;
 
     private int docCount;
@@ -486,8 +486,7 @@ public class DocumentStoreImpl implements DocumentStore {
         if (!this.docsInMemURIs.contains(uri)) {
             return;
         }
-        doc.setLastUseTime(0);
-        this.docHeap.reHeapify(new URIUseTimeComparator(uri, doc.getLastUseTime()));
+        this.docHeap.reHeapify(new URIUseTimeComparator(uri, (long) 0));
         docHeap.remove();
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
