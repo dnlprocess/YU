@@ -181,16 +181,16 @@ public class DocumentStoreImpl implements DocumentStore {
             putDocTrie(doc);
             putDocHeap(doc);
             this.docStore.put(uri, doc);
+            enforceLimits();
             return result;
         }
 
         removeHeapDoc(uri);
         removeDocTrie(this.docStore.get(uri));
-        putDocTrie(doc);
 
         result = this.docStore.put(uri, doc).hashCode();
-
         putDocHeap(doc);
+        putDocTrie(doc);
         enforceLimits();
 
         return result;
