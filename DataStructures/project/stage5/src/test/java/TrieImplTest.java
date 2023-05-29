@@ -18,11 +18,12 @@ public class TrieImplTest {
         trie.put("hell", "fire");
         trie.put("heller", "danger");
         trie.put("hi", "there");
+        trie.put("hola", "there");
 
         List<String> matches = trie.getAllSorted("hell", Comparator.naturalOrder());
         assertEquals(1, matches.size());
-        matches = trie.getAllWithPrefixSorted("hell", Comparator.naturalOrder());
-        assertEquals("danger", matches.get(3));
+        matches = trie.getAllWithPrefixSorted("h", Comparator.naturalOrder());
+        assertEquals("there", matches.get(0));
         assertEquals("fire", matches.get(2));
         assertEquals("tomorrow", matches.get(1));
         assertEquals("world", matches.get(0));

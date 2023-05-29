@@ -28,8 +28,8 @@ public class DocumentStoreImpl implements DocumentStore {
     /**
      * Compares 
      */
-    public class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
-        private URI uri;
+    private class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
+        public URI uri;
         private long lastUseTime;
 
         public URIUseTimeComparator(URI uri, long lastUseTime) {
@@ -37,9 +37,13 @@ public class DocumentStoreImpl implements DocumentStore {
             this.lastUseTime = lastUseTime;
         }
 
+        public URI getURI() {
+            return this.uri;
+        }
+
         @Override
         public int compareTo(URIUseTimeComparator otherURI) {
-            return Integer.compare((int) otherURI.lastUseTime, (int) this.lastUseTime);
+            return Long.compare(this.lastUseTime, otherURI.lastUseTime);
         }
 
         @Override
@@ -66,6 +70,8 @@ public class DocumentStoreImpl implements DocumentStore {
         public URIWordComparator(String word) {
             this.word = word;
         }
+
+        @Override
         public int compare(URI uri, URI otherURI) {
             return Integer.compare(docStore.get(uri).wordCount(word), docStore.get(otherURI).wordCount(word));
         }
@@ -78,6 +84,7 @@ public class DocumentStoreImpl implements DocumentStore {
             this.prefix = prefix;
         }
 
+        @Override
         public int compare(URI uri, URI otherURI) {
             int doc1PrefixCount = countPrefixOccurrences(uri);
             int doc2PrefixCount = countPrefixOccurrences(otherURI);
@@ -101,13 +108,15 @@ public class DocumentStoreImpl implements DocumentStore {
     private Set<URI> docsFromDiskURIs;
     private StackImpl<Undoable> undoableStack;
     private TrieImpl<URI> docTrie;
-    public MinHeapImpl<URIUseTimeComparator> docHeap;
+    private MinHeapImpl<URIUseTimeComparator> docHeap;
     private DocumentPersistenceManager docPersistenceManager;
 
     private int docCount;
     private int docBytes;
     private int maxDocCount;
     private int maxDocBytes;
+
+    private long init_time;
 
     public DocumentStoreImpl() {
         this.docStore = new BTreeImpl<URI, Document>();
@@ -123,6 +132,8 @@ public class DocumentStoreImpl implements DocumentStore {
         this.docBytes = 0;
         this.maxDocCount = Integer.MAX_VALUE;
         this.maxDocBytes = Integer.MAX_VALUE;
+
+        this.init_time = System.nanoTime();
     }
 
     public DocumentStoreImpl(File baseDir) {
@@ -342,7 +353,7 @@ public class DocumentStoreImpl implements DocumentStore {
         List<Document> docs = new ArrayList<Document>();
 
         for (URI uri: uris) {
-            docs.add(get(uri));
+            docs.add(get(uri)); 
         }
 
         enforceLimits();
@@ -370,6 +381,7 @@ public class DocumentStoreImpl implements DocumentStore {
         addCommandSet(uris, docs);
 
         for(URI uri: deletedURIs) {
+            if (uri == null) break;
             removeHeapDoc(uri);
             this.docStore.put(uri, null);
         }
@@ -399,6 +411,7 @@ public class DocumentStoreImpl implements DocumentStore {
         addCommandSet(uris, docs);
 
         for(URI uri: uris) {
+            if (uri == null) break;
             removeHeapDoc(uri);
             this.docStore.put(uri, null);
         }
@@ -486,7 +499,7 @@ public class DocumentStoreImpl implements DocumentStore {
         if (!this.docsInMemURIs.contains(uri)) {
             return;
         }
-        this.docHeap.reHeapify(new URIUseTimeComparator(uri, (long) 0));
+        this.docHeap.reHeapify(this.new URIUseTimeComparator(uri, this.init_time));
         docHeap.remove();
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;

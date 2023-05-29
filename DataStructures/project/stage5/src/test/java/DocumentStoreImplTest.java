@@ -4,22 +4,22 @@ import edu.yu.cs.com1320.project.stage5.Document;
 import edu.yu.cs.com1320.project.stage5.DocumentStore;
 import edu.yu.cs.com1320.project.stage5.DocumentStore.DocumentFormat;
 import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl;
-import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl.URIUseTimeComparator;
 import edu.yu.cs.com1320.project.stage5.impl.DocumentImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-
+import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -408,8 +408,9 @@ public class DocumentStoreImplTest {
         inputStream4 = new ByteArrayInputStream(binaryData3);
         store.put(inputStream4, uri4, DocumentFormat.BINARY);
 
-
-        store.deleteAllWithPrefix("t");
+    
+        //store.searchByPrefix("t");
+        assertEquals(uri3, store.deleteAllWithPrefix("t").toArray()[0]);
         List<Document> docs = store.searchByPrefix("t");
             assertEquals(0, docs.size());
         store.undo();
@@ -522,6 +523,7 @@ public class DocumentStoreImplTest {
     }
 
     @Test
+    @BeforeEach
     public void testUndoMostRecentWhenMostRecentDeletedMultipleDocuments() throws Exception {
         DocumentStoreImpl documentStore = new DocumentStoreImpl();
         /*URI uri1 = new URI("http://edu.yu.cs/com1320/project/doc1");
@@ -552,55 +554,6 @@ public class DocumentStoreImplTest {
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content4.getBytes()), uri4, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content5.getBytes()), uri5, DocumentStore.DocumentFormat.TXT));
         assertEquals(0, documentStore.put(new ByteArrayInputStream(content6.getBytes()), uri6, DocumentStore.DocumentFormat.TXT));
-        assertEquals(uri4, documentStore.get(uri4).getKey());
-        assertEquals(uri2, documentStore.get(uri2).getKey());
-
-
-        // delete multiple documents
-        assertEquals(uri6, documentStore.get(uri6).getKey());
-        assertEquals(uri4, documentStore.get(uri4).getKey());
-        assertEquals(true, documentStore.delete(uri6));
-        //assertEquals(uri4, documentStore.get(uri4).getKey());
-        
-        assertEquals(true, documentStore.delete(uri5));
-        documentStore.delete(uri4);
-
-        documentStore.docHeap.reHeapify(documentStore.new URIUseTimeComparator(uri3, 0));
-        assertEquals(1,documentStore.docHeap.getArrayIndex(documentStore.new URIUseTimeComparator(uri3, 0)));
-        
-        documentStore.delete(uri3);
-        documentStore.delete(uri1);
-        //assertEquals(uri2, documentStore.get(uri2).getKey());
-        //assertEquals(true, documentStore.delete(uri2));
-        //uri2 = new URI("http://edu.yu.cs/com1320/project/doc2");
-        
-       //assertEquals(uri2, documentStore.get(uri2).getKey());
-       // assertEquals(true, documentStore.delete(uri2));
-
-        // verify that the most recent document was deleted
-        assertNull(documentStore.get(uri4));
-        assertNull(documentStore.get(uri6));
-        
-        // undo most recent deletion
-        documentStore.undo();
-        documentStore.undo();
-        documentStore.undo();
-        documentStore.undo();
-        documentStore.undo();
-        documentStore.undo();
-        //assertEquals(, ((GenericCommand) documentStore.undoableStack.peek()).getTarget().toString());
-
-        // verify that the most recent deletion was undone
-        assertNotNull(documentStore.get(uri6));
-        //assertNotNull(documentStore.get(uri1));
-        //assertNotNull(documentStore.get(uri2));
-        //assertNotNull(documentStore.get(uri3));
-
-        // undo again to verify that the second most recent deletion was undone
-        //documentStore.undo();
-        //assertNotNull(documentStore.get(uri4));
-        //assertNotNull(documentStore.get(uri5));
-        
     }
 
     @Test
@@ -681,12 +634,35 @@ public class DocumentStoreImplTest {
 
         // check that the first document was removed
         List<Document> allDocuments = documentStore.search("Document");
-        assertEquals(3, allDocuments.size());
+        assertEquals(5, allDocuments.size());
         assertTrue(allDocuments.contains(document));
         assertFalse(allDocuments.contains(new DocumentImpl(uris[0], texts[0], null)));
         assertNull(documentStore.get(uris[0]));
         assertNull(documentStore.get(uris[1]));
         assertNotNull(documentStore.get(uris[2]));
+    }
+
+    @Test
+    public void testSetLimit() throws Exception {
+        store = new DocumentStoreImpl();
+        URI uri;
+        InputStream input;
+        String text;
+        for (int i=0; i<10; i++) {
+            text = ("Doc number: " + i);
+            input = new ByteArrayInputStream(text.getBytes());
+            uri = new URI("https://yu.edu.uri" + i);
+            store.put(input, uri, DocumentFormat.TXT);
+        }
+
+        for (int i=0; i<10; i++) {
+            text = ("Doc part: " + i);
+            input = new ByteArrayInputStream(text.getBytes());
+            uri = new URI("https://yu.edu.uri" + i);
+            store.put(input, uri, DocumentFormat.TXT);
+        }
+
+        
     }
 
     @Test

@@ -1,8 +1,15 @@
 package edu.yu.cs.com1320.project.impl;
 
 import edu.yu.cs.com1320.project.MinHeap;
-import java.lang.reflect.Array;
 
+import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl;
+/*
+import java.lang.reflect.Array;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+*/
 import java.util.NoSuchElementException;
 
 public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
@@ -30,14 +37,14 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
     /**
      * get the index of the element within the array. If it is not present throw NoSuchElementException
      */
-    public int getArrayIndex(E element) {// fix_______________
+    protected int getArrayIndex(E element) {// fix_______________
         for (int i=1; i<=this.count; i++) {
             if (this.elements[i].equals(element)) {
                 return i;
             }
         }
-
-        throw new NoSuchElementException("Element not in heap!");
+        
+        throw new NoSuchElementException("Element not in heap!: " + element.toString());
     }
 
     @Override
