@@ -28,6 +28,8 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
 
         int index = getArrayIndex(element);
         
+        this.elements[index] = element;
+
         upHeap(index);
         index = getArrayIndex(element);
         downHeap(index);
