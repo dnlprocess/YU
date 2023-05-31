@@ -83,7 +83,7 @@ public class TrieImpl<Value> implements Trie<Value>{
             return matches;
         }
         matches = x.vals;
-        Collections.sort(matches, comparator.reversed());
+        Collections.sort(matches, comparator);
         return matches;
     }
 
@@ -120,7 +120,7 @@ public class TrieImpl<Value> implements Trie<Value>{
         }
 
         getAllValues(x, prefix, matches);
-        Collections.sort(matches, comparator.reversed());
+        Collections.sort(matches, comparator);
         return matches;
     }
 
