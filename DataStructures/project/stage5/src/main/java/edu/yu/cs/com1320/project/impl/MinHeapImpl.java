@@ -3,6 +3,7 @@ package edu.yu.cs.com1320.project.impl;
 import edu.yu.cs.com1320.project.MinHeap;
 
 import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl;
+import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl.URIUseTimeComparator;
 /*
 import java.lang.reflect.Array;
 import java.net.URI;
@@ -26,13 +27,24 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
             throw new NoSuchElementException();
         }
 
+        System.out.println("Before: \n");
+        printHeap();
+
+        if (element.getClass() == URIUseTimeComparator.class) {
+            System.out.println("reheapify: " + ((URIUseTimeComparator) element).uri.toString());
+        }
+
         int index = getArrayIndex(element);
+        elements[index] = element;
         
         this.elements[index] = element;
 
         upHeap(index);
         index = getArrayIndex(element);
         downHeap(index);
+
+        System.out.println("After: \n");
+        printHeap();
     }
 
     @Override
@@ -42,8 +54,26 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
     protected int getArrayIndex(E element) {// fix_______________
         for (int i=1; i<=this.count; i++) {
             if (this.elements[i].equals(element)) {
+                if (element.getClass() == URIUseTimeComparator.class) {
+                    System.out.println("matches: " + ((URIUseTimeComparator) elements[i]).uri.toString());
+                }
+                System.out.println(i);
                 return i;
             }
+        }
+        
+        /*
+        try {
+            if (((URIUseTimeComparator) element).uri.equals(new URI("http://edu.yu.cs/com1320/project/doc1"))) {
+                throw new IllegalArgumentException();
+            }
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        */
+        if (element.getClass() == DocumentStoreImpl.URIUseTimeComparator.class) {
+            throw new NoSuchElementException(((URIUseTimeComparator) element).getURI().toString());
         }
         
         throw new NoSuchElementException("Element not in heap!: " + element.toString());
@@ -56,9 +86,20 @@ public class MinHeapImpl<E extends Comparable<E>> extends MinHeap<E> {
 
         for (int i = 1; i <= this.count; i++) {
             tempElements[i] = elements[i];
+            System.out.println("organize " + tempElements[i].toString());
         }
 
         this.elements = tempElements;
+    }
+
+    //-------------------------
+
+    public void printHeap() {
+        for (E element: this.elements) {
+            if (element != null && element.getClass() == URIUseTimeComparator.class) {
+                System.out.println(((URIUseTimeComparator) element).uri.toString());
+            }
+        }
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.Function;
 
 
@@ -28,7 +29,7 @@ public class DocumentStoreImpl implements DocumentStore {
     /**
      * Compares 
      */
-    private class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
+    public class URIUseTimeComparator implements Comparable<URIUseTimeComparator> {
         public URI uri;
         private long lastUseTime;
 
@@ -56,7 +57,9 @@ public class DocumentStoreImpl implements DocumentStore {
                 return false;
             }
             URIUseTimeComparator otherURI = (URIUseTimeComparator) obj;
+            if (this.uri.equals(otherURI.uri)) System.out.println("   equals: " + this.uri.toString() + ", other uri: " + otherURI.uri.toString());
             return this.uri.equals(otherURI.uri);
+            //return this.uri.hashCode() == otherURI.uri.hashCode();
         }
     }
 
@@ -115,6 +118,7 @@ public class DocumentStoreImpl implements DocumentStore {
     private long init_time;
 
     public DocumentStoreImpl() {
+        System.out.println("yay");
         this.docStore = new BTreeImpl<URI, Document>();
         this.docsInMemURIs = new HashSet<URI>();
         this.docsFromDiskURIs = new HashSet<URI>();
@@ -469,12 +473,14 @@ public class DocumentStoreImpl implements DocumentStore {
         this.docCount++;
         this.docBytes += bytes;
         this.docHeap.insert(new URIUseTimeComparator(doc.getKey(), doc.getLastUseTime()));
+        this.docHeap.printHeap();
         this.docsInMemURIs.add(doc.getKey());
     }
 
     private void removeHeapDoc() {
         
         URI uri = this.docHeap.remove().uri;
+        this.docHeap.printHeap();
         Document doc = this.docStore.get(uri);
         if (!this.docsInMemURIs.contains(uri)) {
             return;
@@ -497,6 +503,7 @@ public class DocumentStoreImpl implements DocumentStore {
         }
         this.docHeap.reHeapify(this.new URIUseTimeComparator(uri, this.init_time));
         docHeap.remove();
+        this.docHeap.printHeap();
         this.docCount--;
         this.docBytes -= doc.getDocumentBinaryData() == null? doc.getDocumentTxt().getBytes().length : doc.getDocumentBinaryData().length;
         try {

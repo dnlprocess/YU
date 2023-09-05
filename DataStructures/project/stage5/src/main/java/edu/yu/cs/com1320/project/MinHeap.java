@@ -2,6 +2,9 @@ package edu.yu.cs.com1320.project;
 
 import java.util.NoSuchElementException;
 
+import edu.yu.cs.com1320.project.impl.MinHeapImpl;
+import edu.yu.cs.com1320.project.stage5.impl.DocumentStoreImpl.URIUseTimeComparator;
+
 /**
  * Beginnings of a MinHeap, for Stage 4 of project. Does not include the additional data structure or logic needed to reheapify an element after its last use time changes.
  * @param <E>
@@ -77,6 +80,9 @@ public abstract class MinHeap<E extends Comparable<E>> {
         this.elements[++this.count] = x;
         //percolate it up to maintain heap order property
         this.upHeap(this.count);
+        if (x.getClass() == URIUseTimeComparator.class) {
+            System.out.println("insert: " + ((URIUseTimeComparator) x).uri.toString());
+        }
     }
 
     public E remove() {
@@ -84,6 +90,9 @@ public abstract class MinHeap<E extends Comparable<E>> {
             throw new NoSuchElementException("Heap is empty");
         }
         E min = this.elements[1];
+        if (min.getClass() == URIUseTimeComparator.class) {
+            System.out.println("remove: " + ((URIUseTimeComparator) min).uri.toString());
+        }
         //swap root with last, decrement count
         this.swap(1, this.count--);
         //move new root down as needed
