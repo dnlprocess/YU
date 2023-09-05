@@ -1,14 +1,16 @@
 package edu.yu.introtoalgs;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import edu.yu.introtoalgs.OctopusCountI;
 
 public class OctopusCount implements OctopusCountI{
-    private int count = 0;
-    private Map<Observation, Integer> observations;
+    private int count;
+    private /*Map<Observation, Integer>*/ HashSet<HashMap<String, Integer>> observations;
 
     /*
      * Do not care about order/consecutive
@@ -20,7 +22,7 @@ public class OctopusCount implements OctopusCountI{
      * Convert each to a single list where you have each value together
      */
 
-    private class Observation {
+    /*private class Observation {
         Map<String, Integer> map;
 
         @Override
@@ -37,11 +39,12 @@ public class OctopusCount implements OctopusCountI{
 
             return this.map.equals(otherObs.map);
         }
-    }
+    }*/
 
 
     public OctopusCount() {
-        this.observations = new HashMap<Observation, Integer>();
+        this.observations = new HashSet<HashMap<String, Integer>>()/*HashMap<Observation, Integer>()*/;
+        this.count = 0;
     }
 
     /*
@@ -68,11 +71,16 @@ public class OctopusCount implements OctopusCountI{
 
             String armString = colors[i] + Integer.toString(lengthInCM[i]) + textures[i];
     
-            int entries = map.get(armString) == null? 0: map.get(armString) +1;
-            map.put(armString, entries);
+            int entries = map.get(armString) == null? 0: map.get(armString);
+            map.put(armString, entries+1);
         }
 
-
+        if (!observations.contains(map)) {
+            count++;
+        }
+        observations.add(map);
+        //int observed = observations.get(map) == null? 0: observations.get(map);
+        //observations.put(map, observed+1);
 
     }
 
