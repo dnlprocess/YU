@@ -23,11 +23,19 @@ public class OctopusCount implements OctopusCountI{
     private class Observation {
         Map<String, Integer> map;
 
-        
-
         @Override
         public int hashCode() {
-            
+            return map.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Observation otherObs = (Observation) obj;
+            if (otherObs.hashCode() != this.hashCode()) {
+                return false;
+            }
+
+            return this.map.equals(otherObs.map);
         }
     }
 
@@ -40,25 +48,32 @@ public class OctopusCount implements OctopusCountI{
      * Make sure not negative
      * make sure all 8 long
      * make sure follow enum but that should take care of itself
+     * make sure one of enum values
      */
     public void addObservation(int observationId,
                              ArmColor[] colors,
                              int[] lengthInCM,
                              ArmTexture[] textures) throws IllegalArgumentException {
+        
         if (observationId < 0 || colors.length != N_ARMS || lengthInCM.length != N_ARMS || textures.length != N_ARMS)  {
             throw new IllegalArgumentException();
         }
+
+        HashMap<String, Integer> map = new HashMap<>();
+
         for (int i=0; i<N_ARMS;i++) {
             if (colors[i] == null || lengthInCM[i] <= 0 || textures[i] == null) {
                 throw new IllegalArgumentException();
             }
-        }
-        ArrayList<String> list = new ArrayList<>();/*stream from multiple list to single list
-        turn into set 
-        Use enum and switch case
-        */
 
-        HashMap<String, Integer> map = new HashMap<>();
+            String armString = colors[i] + Integer.toString(lengthInCM[i]) + textures[i];
+    
+            int entries = map.get(armString) == null? 0: map.get(armString) +1;
+            map.put(armString, entries);
+        }
+
+
+
     }
 
     public int countThem() {
