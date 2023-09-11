@@ -35,7 +35,7 @@ public class OctopusCount implements OctopusCountI{
 
         HashMap<Long, Integer> map = new HashMap<>();
 
-        System.out.println("start");
+        //System.out.println("start");
         for (int i=0; i<N_ARMS;i++) {
             if (colors[i] == null || lengthInCM[i] <= 0 || textures[i] == null) {
                 throw new IllegalArgumentException();
