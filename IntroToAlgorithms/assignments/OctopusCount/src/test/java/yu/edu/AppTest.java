@@ -69,9 +69,11 @@ public class AppTest
     
     @Test
     public void mainTest () {
-        int n = 8;
+        int n = 2;
 
-        for (int i=1; i<20; i++) {
+        System.out.println("begin");
+
+        for (int i=1; i<50; i++) {
             n = n*2;
             int time = nTest(n);
             System.out.println(time);
@@ -89,7 +91,7 @@ public class AppTest
         int observationCounter = 0;
         
         for (int j=0; j<n;j++){
-            if (j%3==0 && j>1) {
+            if ((j%3==0 || j%7==0)&& j>1) {
                 List<Integer> indices = createIndices();
                 colors[j] = shuffle(indices, colors[j-1]);
                 textures[j] = shuffle(indices, textures[j-1]);
