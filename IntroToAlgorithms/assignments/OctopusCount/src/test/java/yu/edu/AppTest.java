@@ -3,6 +3,7 @@ package yu.edu;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,14 +30,14 @@ public class AppTest
     private static final Random RANDOM = new Random();
 
     public static ArmColor randomColor()  {
-        return COLORS.get(RANDOM.nextInt(SIZE));
+        return COLORS.get(RANDOM.nextInt(2));
     }
 
     public static ArmTexture randomTexture()  {
-        return TEXTURES.get(RANDOM.nextInt(SIZE));
+        return TEXTURES.get(RANDOM.nextInt(3));
     }
     public static int randomLength() {
-        return new Random().nextInt(35);
+        return new Random().nextInt(35)+1;
     }
 
     /**
@@ -49,13 +50,15 @@ public class AppTest
         final OctopusCountI oc = new OctopusCount ();
         int observationCounter = 0;
         
-        final ArmColor[] colors1 = {ArmColor.GRAY, ArmColor.GRAY, ArmColor.GRAY, ArmColor.RED, ArmColor.RED, ArmColor.RED, ArmColor.BLACK, ArmColor.BLACK };
-        final int[] lengthInCM1 = { 1,2,3,4,5,6,7,8};
-        final ArmTexture[] textures1 = {ArmTexture.SMOOTH, ArmTexture.SMOOTH, ArmTexture.SMOOTH, ArmTexture.SLIMY, ArmTexture.SLIMY, ArmTexture.SLIMY, ArmTexture.STICKY, ArmTexture.STICKY};
+        ArmColor[] colors1 = {ArmColor.GRAY, ArmColor.GRAY, ArmColor.GRAY, ArmColor.RED, ArmColor.RED, ArmColor.RED, ArmColor.BLACK, ArmColor.BLACK };
+        int[] lengthInCM1 = { 1,2,3,4,5,6,7,8};
+        ArmTexture[] textures1 = {ArmTexture.SMOOTH, ArmTexture.SMOOTH, ArmTexture.SMOOTH, ArmTexture.SLIMY, ArmTexture.SLIMY, ArmTexture.SLIMY, ArmTexture.STICKY, ArmTexture.STICKY};
         observationCounter++;
-        
+    
+        List<Integer> indices = createIndices();
         addObservation(observationCounter, oc, colors1, lengthInCM1, textures1);
         addObservation(observationCounter, oc, colors1, lengthInCM1, textures1);
+        addObservation(observationCounter, oc, shuffle(indices, colors1), shuffleInt(indices, lengthInCM1), shuffle(indices, textures1));
         final int count = oc.countThem() ;
         assertTrue(String.format("count: %2d, true: %2d", count, observationCounter), count == observationCounter);
     
@@ -63,9 +66,9 @@ public class AppTest
         long duration = (endTime - startTime);
         System.out.println(duration);
     }
-
+    
     @Test
-    private void mainTest () {
+    public void mainTest () {
         int n = 8;
 
         for (int i=1; i<15; i++) {
@@ -85,19 +88,19 @@ public class AppTest
 
         int observationCounter = 0;
         
-        while (n>0){
-            n--;
-            if (n%3==0) {
-                colors[n] = shuffle(colors[n-1]);
-                textures[n] = shuffle(textures[n-1]);
-                lengthsInCM[n] = shuffleInt(lengthsInCM[n-1]);
+        for (int j=0; j<n;j++){
+            if (j%3==0 && j>1) {
+                List<Integer> indices = createIndices();
+                colors[j] = shuffle(indices, colors[j-1]);
+                textures[j] = shuffle(indices, textures[j-1]);
+                lengthsInCM[j] = shuffleInt(indices, lengthsInCM[j-1]);
                 continue;
             }
 
             for (int i = 0; i < 8; i++) {
-                colors[n][i] = randomColor();
-                textures[n][i] = randomTexture();
-                lengthsInCM[n][i] = randomLength();
+                colors[j][i] = randomColor();
+                textures[j][i] = randomTexture();
+                lengthsInCM[j][i] = randomLength();
             }
             observationCounter++;
         }
@@ -109,7 +112,7 @@ public class AppTest
         }
 
         int count = oc.countThem() ;
-        assertTrue(String.format("count: %2d, true: %2d", count, observationCounter), count == observationCounter);
+        assertTrue(String.format("count: %2d, true: %2d, n: %d", count, observationCounter, n), count == observationCounter);
 
 
         long endTime = System.nanoTime();
@@ -139,10 +142,18 @@ public class AppTest
         }
     }
 
-    public static <T> T[] shuffle(T[] array) {
-        List<Integer> indices = IntStream.range(0, array.length).boxed().toList();
-        Collections.shuffle(indices, new Random());
+    public static List<Integer> createIndices() {
+        List<Integer> indices = new ArrayList<>();
 
+        for (int i = 0; i <= 7; i++) {
+            indices.add(i);
+        }
+        
+        Collections.shuffle(indices, new Random());
+        return indices;
+    }
+
+    public static <T> T[] shuffle(List<Integer> indices, T[] array) {
         T[] originalArray = Arrays.copyOf(array, array.length);
         IntStream.range(0, array.length)
             .forEach(i -> originalArray[i] = array[indices.get(i)]);
@@ -150,10 +161,7 @@ public class AppTest
         return originalArray;
     }
 
-    public static int[] shuffleInt(int[] array) {
-        List<Integer> indices = IntStream.range(0, array.length).boxed().toList();
-        Collections.shuffle(indices, new Random());
-
+    public static int[] shuffleInt(List<Integer> indices, int[] array) {
         int[] originalArray = Arrays.copyOf(array, array.length);
         IntStream.range(0, array.length)
             .forEach(i -> originalArray[i] = array[indices.get(i)]);
