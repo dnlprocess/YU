@@ -69,8 +69,9 @@ public class BigOIt2 extends BigOIt2Base {
         List<Double> slopes = new ArrayList<>();
         List<Double> ratios = new ArrayList<>();
 
+        BigOMeasurable oMeasurable;
         try {
-            BigOMeasurable oMeasurable = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
+            oMeasurable = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
         } catch (Exception e) {
             throw new IllegalArgumentException();
         }
@@ -130,7 +131,7 @@ public class BigOIt2 extends BigOIt2Base {
                     runTimes.remove(0);
                 }
 
-                mse(ratio) vs mse(2^slope)
+                //mse(ratio) vs mse(2^slope)
             }
 
         }
