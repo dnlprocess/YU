@@ -117,7 +117,7 @@ public class BigOIt2 extends BigOIt2Base {
                 }
 
 
-                calculateSlope(nValues, runTimes);
+                double powerMSE = calculateSlope(nValues, runTimes, slopes);
 
                 //ratios
                 
@@ -125,31 +125,41 @@ public class BigOIt2 extends BigOIt2Base {
                     ratios.add(Double.NaN);
                     continue;
                 }
+                while (ratios.remove(Double.NaN)){};
                 ratios.add(runTimes.get(runTimes.size()-1)/runTimes.get(runTimes.size()-2));
                 if (ratios.get(ratios.size()-1) < 1) {// decreasing despite doubling n
                     throw new IllegalArgumentException();
                 }
                 
-                double ratio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
 
                 double meanRuntime = runTimes.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
                 double std = Math.sqrt(runTimes.stream().map(i -> Math.pow(i-meanRuntime, 2)).mapToDouble(Double::doubleValue).sum()/n);
-                if (Math.abs(meanRuntime - ratios.get(0)) > std) {
+                if (Math.abs(meanRuntime - runTimes.get(0)) > std) {
                     nValues.remove(0);
                     runTimes.remove(0);
+                    ratios.remove(0);
+                    slopes.remove(0);
                 }
 
-                //mse(ratio) vs mse(2^slope)
+                double ratioMSE = IntStream.range(1, runTimes.size())
+                .mapToObj(i -> Math.pow(runTimes.get(i-1)*ratios.get(ratios.size()-1) - runTimes.get(i), 2))
+                .mapToDouble(Double::doubleValue).sum()/(n-1);
+
+                if (ratioMSE > powerMSE) {
+                    ratios.remove(ratios.size()-1);
+                    ratios.add(slopes.get(slopes.size()-1));
+                }
             }
 
         }
         finally {
             executor.shutdown();
         }
-        return Math.pow(2, slopes.get(slopes.size()-1));
+        return ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
+        //return Math.pow(2, slopes.get(slopes.size()-1));
     }
 
-    private double calculateSlope(List<Integer> nValues, List<Double> runTimes) {
+    private double calculateSlope(List<Integer> nValues, List<Double> runTimes, List<Double> slopes) {
         int n = nValues.size();
         List<Double> logX = nValues.stream().map(i -> Math.log(i)).collect(Collectors.toList());
         List<Double> logY = runTimes.stream().map(i -> Math.log(i)).collect(Collectors.toList());
@@ -172,6 +182,8 @@ public class BigOIt2 extends BigOIt2Base {
 
         double power = numerator / denominator;
 
+        slopes.add(Math.pow(2, power));
+
         double multiplicativeConstant = (sumTimes - (power * sumN)) / n;
 
         List<Double> predRuntimes = nValues.stream().map(i -> multiplicativeConstant * Math.pow(i, power)).collect(Collectors.toList());
@@ -180,26 +192,11 @@ public class BigOIt2 extends BigOIt2Base {
         .mapToObj(i -> Math.pow(runTimes.get(i) - predRuntimes.get(i), 2))
         .collect(Collectors.toList());
 
-        double mse = rss.stream().mapToDouble(Double::doubleValue).sum()/(n-2);
-
-        if (n>=8) {
-            double mse1 = rss.stream().skip(1).mapToDouble(Double::doubleValue).sum()/(n-3);
-            if (mse1 < mse) {
-                mse = mse1;
-                nValues.remove(0);
-                runTimes.remove(0);
-            }
-        }
+        double mse = rss.stream().mapToDouble(Double::doubleValue).sum()/n;
         
         if (mse >= 1) {
             return Double.NaN;
         }
-        return power;
-    }
-
-    private double altCalculateSlope(List<Integer> nValues, List<Double> runTimes) {
-        int n = nValues.size();
-        List<Double> ratios = IntStream.range(1, n)
-        .mapToObj(i -> runTimes.get(i)/runTimes.get(i-1)).;
+        return mse;
     }
 }
