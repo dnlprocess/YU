@@ -73,7 +73,7 @@ public class AppTest
 
         System.out.println("begin");
 
-        for (int i=1; i<50; i++) {
+        for (int i=1; i<20; i++) {
             n = n*2;
             int time = nTest(n);
             System.out.println(time);
