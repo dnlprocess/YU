@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -100,13 +101,20 @@ public class BigOIt2 extends BigOIt2Base {
                 Future<Double> testFuture1 = executor.submit(testTask1);
                 Future<Double> testFuture2 = executor.submit(testTask2);
 
-                nValues.add(n);
-                runTimes.add((testFuture1.get() + testFuture2.get())/2);
-
                 if (timer.isTimedOut()) {
                     break;
                 }
 
+                nValues.add(n);
+                try {
+                    runTimes.add((testFuture1.get() + testFuture2.get())/2);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
 
                 calculateSlope(nValues, runTimes);
