@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -23,6 +25,7 @@ public class BigOIt2 extends BigOIt2Base {
 
     private class Timer {
         private final long timeOutInMs;
+        private long startTimeInMs;
         private final AtomicBoolean timedOut = new AtomicBoolean(false);
 
         public Timer(long timeOutInMs) {
@@ -30,16 +33,17 @@ public class BigOIt2 extends BigOIt2Base {
         }
 
         public void start() {
-            long startTimeInMs = System.currentTimeMillis();
+            this.startTimeInMs = System.currentTimeMillis();
 
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(() -> {
-                long elapsedTimeInMs = System.currentTimeMillis() - startTimeInMs;
-                if (elapsedTimeInMs >= timeOutInMs) {
-                    timedOut.set(true);
-                    scheduler.shutdown();
-                }
-            }, 0, 100, TimeUnit.MILLISECONDS);
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
+                this.timedOut.set(true);
+                Thread.currentThread().interrupt();
+            }, timeOutInMs, TimeUnit.MILLISECONDS);
+        }
+
+        public long timeLeft() {
+            return this.timeOutInMs - (System.currentTimeMillis() - this.startTimeInMs);
         }
 
         public boolean isTimedOut() {
@@ -62,8 +66,12 @@ public class BigOIt2 extends BigOIt2Base {
 
     public double doublingRatio(String bigOMeasurable, long timeOutInMs) throws IllegalArgumentException {
         long startTime = System.nanoTime();
-        ExecutorService executor = Executors.newFixedThreadPool(4);
         Timer timer = new Timer(timeOutInMs);
+        timer.start();
+        int availableThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(availableThreads);
+
+        //ExecutorCompletionService<Double> completionService = new ExecutorCompletionService<>(executor);
 
         List<Integer> nValues = new ArrayList<>();
         List<Double> runTimes = new ArrayList<>();
@@ -72,110 +80,110 @@ public class BigOIt2 extends BigOIt2Base {
         List<Double> ratios = new ArrayList<>();
 
         BigOMeasurable oMeasurable1;
-        BigOMeasurable oMeasurable2;
-        BigOMeasurable oMeasurable3;
-        BigOMeasurable oMeasurable4;
+        List<BigOMeasurable> oMeasureables = new ArrayList<>();
+
         try {
             oMeasurable1 = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
-            oMeasurable2 = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
-            oMeasurable3 = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
-            oMeasurable4 = (BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance();
+            for (int i=0; i<availableThreads; i++) {
+                oMeasureables.add((BigOMeasurable) Class.forName(bigOMeasurable).getConstructor().newInstance());
+            }
         } catch (Exception e) {
             throw new IllegalArgumentException();
         }
 
         try {
-            timer.start();
-
             //warm-up
             for (int i=0; i < 10; i++) {
                 oMeasurable1.setup(5);
                 oMeasurable1.execute();
             }
 
-            while (!timer.isTimedOut()) {
-                int n = nValues.isEmpty()? 8: 2 * nValues.get(nValues.size()-1);
+            while (!timer.isTimedOut() && !Thread.currentThread().isInterrupted()) {
+                int n = nValues.isEmpty()? 16: 2 * nValues.get(nValues.size()-1);
+                List<Future<Double>> futures = new ArrayList<>();
+                
+                for (BigOMeasurable oMeasurable: oMeasureables) {
+                    Callable<Double> test = () ->
+                        {
+                            if (Thread.currentThread().isInterrupted()) {
+                                return 0.0;
+                            }
+                            try {
+                                oMeasurable.setup(n);
+                                Thread.sleep(0);
+                                long start = System.nanoTime();
+                                oMeasurable.execute();
+                                long end = System.nanoTime();
+                                return (double) (end - start);
+                            } catch (Throwable t) {
+                                return 0.0;
+                            }
+                        };
+                    futures.add(executor.submit(test));
+                }
+                
+                List<Double> currRuntimes = futures.stream()
+                    .map(future -> {
+                        try {
+                            return future.get();
+                        } catch (InterruptedException | ExecutionException e) {//time out or mem overload!
+                            e.printStackTrace();
+                            return 0.0;
+                        }
+                    })
+                    .collect(Collectors.toList());
+                
+                double avgRuntime = currRuntimes.stream()
+                    .anyMatch(value -> value == 0.0) ? 0.0
+                    : currRuntimes.stream()
+                        .mapToDouble(Double::doubleValue)
+                        .average()
+                        .orElse(0.0);
 
-                Callable<Double> testTask1 = () -> {
-                    oMeasurable1.setup(n);
-                    long start = System.nanoTime();
-                    oMeasurable1.execute();
-                    long end = System.nanoTime();
-                    return (double) (end - start);
-                };
-                Callable<Double> testTask2 = () -> {
-                    oMeasurable2.setup(n);
-                    long start = System.nanoTime();
-                    oMeasurable2.execute();
-                    long end = System.nanoTime();
-                    return (double) (end - start);
-                };
-                Callable<Double> testTask3 = () -> {
-                    oMeasurable3.setup(n+1);
-                    long start = System.nanoTime();
-                    oMeasurable3.execute();
-                    long end = System.nanoTime();
-                    return (double) (end - start);
-                };
-                Callable<Double> testTask4 = () -> {
-                    oMeasurable4.setup(n-1);
-                    long start = System.nanoTime();
-                    oMeasurable4.execute();
-                    long end = System.nanoTime();
-                    return (double) (end - start);
-                };
-
-                Future<Double> testFuture1 = executor.submit(testTask1);
-                Future<Double> testFuture2 = executor.submit(testTask2);
-                Future<Double> testFuture3 = executor.submit(testTask3);
-                Future<Double> testFuture4 = executor.submit(testTask4);
-
-                if (timer.isTimedOut()) {
+                if (avgRuntime == 0.0) {
                     break;
                 }
-
                 nValues.add(n);
-                try {
-                    runTimes.add((testFuture1.get() + testFuture2.get() + testFuture3.get() + testFuture4.get())/4);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    // could be outofmemory
-                    break;
-                }
+                runTimes.add(avgRuntime);
+                System.out.printf("n: %d, how many runs: %d, avg: %f, std: %f\n", n, currRuntimes.size(), avgRuntime, Math.sqrt(currRuntimes.stream().map(i -> Math.pow(i-avgRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(currRuntimes.size()-1)));
 
-                if (runTimes.size() < 4) {
+
+                if (nValues.size() < 4) {
                     ratios.add(Double.NaN);
                     continue;
                 }
                 
                 ratios.add(runTimes.get(runTimes.size()-1)/runTimes.get(runTimes.size()-2));
         
-                
-                if (ratios.get(ratios.size()-1) < 1 && runTimes.get(runTimes.size()-2)/runTimes.get(runTimes.size()-3) < 1) {// decreasing despite doubling n
-                    System.out.printf("error: %.2f, runtime less: %.2f, runtime more: %.2f", ratios.get(ratios.size()-1), runTimes.get(runTimes.size()-2), runTimes.get(runTimes.size()-1));
-                    throw new IllegalArgumentException();
-                }
+
         
                 System.out.println(ratios.get(ratios.size()-1));
                 
-                if (runTimes.size() < 6) {
+                if (nValues.size() < 6) {
                     continue;
                 }
+                if (ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0) < 1) {// decreasing despite doubling n
+                    System.out.printf("error: %f, runtime less: %f, runtime more: %f", ratios.get(ratios.size()-1), runTimes.get(runTimes.size()-2), runTimes.get(runTimes.size()-1));
+                    System.out.printf("n less: %d, n more: %d", nValues.get(nValues.size()-2), nValues.get(nValues.size()-1));
+        
+                    throw new IllegalArgumentException();
+                }
                 //double powerMSE = calculateSlope(nValues, runTimes, slopes);
-                
+                    
                 while (ratios.remove(Double.NaN)){};
-                /*double zScore = 1;
+
+                double zScore = 1;
                 double meanRuntime = runTimes.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
-                double std = Math.sqrt(runTimes.stream().map(i -> Math.pow(i-meanRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(n-1));
+                double std = Math.sqrt(runTimes.stream().map(i -> Math.pow(i-meanRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(runTimes.size()-1));
+
                 if (Math.abs(meanRuntime - runTimes.get(0)) > std * zScore) {
+                    System.out.printf("std: %f", std);
                     nValues.remove(0);
                     runTimes.remove(0);
                     ratios.remove(0);
                     //slopes.remove(0);
                 }
-
+                /*
                 double ratioMSE = IntStream.range(1, runTimes.size())
                 .mapToObj(i -> Math.pow(runTimes.get(i-1)*ratios.get(ratios.size()-1) - runTimes.get(i), 2))
                 .mapToDouble(Double::doubleValue).sum()/(n-1);
@@ -190,25 +198,25 @@ public class BigOIt2 extends BigOIt2Base {
         finally {
             executor.shutdown();
         }
-        double ratio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
-        double meanRuntime = runTimes.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
+        double ratio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double meanRuntime = runTimes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         double std = Math.sqrt(runTimes.stream().map(i -> Math.pow(i-meanRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(runTimes.size()-1));
         if (runTimes.size() < 4 || std/meanRuntime > 4) {
-            System.out.printf("Size is %d, and rsd is %.2f", runTimes.size(), std/meanRuntime);
+            System.out.printf("Size is %d, and rsd is %f", runTimes.size(), std/meanRuntime);
             return Double.NaN;
         }
         long endTime = System.nanoTime();
         
-        System.out.printf("Size is %d, and rsd is %.2f", runTimes.size(), std/meanRuntime);
+        System.out.printf("Size is %d, and rsd is %f", runTimes.size(), std/meanRuntime);
             
-        //System.out.printf("ratio: %.2f, slope: %.2f", ratios.get(ratios.size()-1), slopes.get(slopes.size()-1));
+        //System.out.printf("ratio: %f, slope: %f", ratios.get(ratios.size()-1), slopes.get(slopes.size()-1));
         System.out.println("ratios");
         ratios.stream().forEach(element -> System.out.print(element + "\t"));
         System.out.println("\nslopes");
         slopes.stream().forEach(element -> System.out.print(element + "\t"));
         System.out.printf("n: %d", nValues.get(nValues.size()-1));
-        System.out.printf("\n ratio avg: %.2f", ratio);
-        System.out.printf("time: %.2f", (double) (endTime-startTime));
+        System.out.printf("\n ratio avg: %f", ratio);
+        System.out.printf("time: %f", (double) (endTime-startTime));
         return ratio;
         //return Math.pow(2, slopes.get(slopes.size()-1));
     }
