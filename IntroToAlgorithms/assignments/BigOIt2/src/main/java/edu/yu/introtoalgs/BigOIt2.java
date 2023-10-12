@@ -194,7 +194,7 @@ public class BigOIt2 extends BigOIt2Base {
                     }
                 }
 
-                if (nValues.get(nValues.size()-1)>512 && Math.abs(meanRatio - ratio) > std * 2) {
+                if (nValues.get(nValues.size()-1)>512 && Math.abs(meanRatio - ratio) > std * 2.1) {
                     ratio = ratios.remove(ratios.size()-1);
                     ratios.add(ratios.size()-1, (2*ratio + (ratio < meanRatio ? 0.1 : -0.1) * Math.abs(ratio - meanRatio))/2);
                 }
