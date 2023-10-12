@@ -40,8 +40,8 @@ public class BigOIt2 extends BigOIt2Base {
 
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
-                System.out.print("\n\n\n\n");
-                System.out.println(System.currentTimeMillis() - this.startTimeInMs);
+                //System.out.print("\n\n\n\n");
+                //System.out.println(System.currentTimeMillis() - this.startTimeInMs);
                 this.timedOut.set(true);
                 interruptExecutor();
             }, timeOutInMs, TimeUnit.MILLISECONDS);
@@ -87,9 +87,9 @@ public class BigOIt2 extends BigOIt2Base {
      */
 
     public double doublingRatio(String bigOMeasurable, long timeOutInMs) throws IllegalArgumentException {
-        long startTime = System.nanoTime();
+        //long startTime = System.nanoTime();
         Timer timer = new Timer(timeOutInMs - 100);
-        int availableThreads = Runtime.getRuntime().availableProcessors();
+        int availableThreads = Runtime.getRuntime().availableProcessors()-1;
         ExecutorService executor = Executors.newFixedThreadPool(availableThreads);
         timer.start(executor);
         //ExecutorCompletionService<Double> completionService = new ExecutorCompletionService<>(executor);
@@ -136,7 +136,7 @@ public class BigOIt2 extends BigOIt2Base {
                     try {
                         currRuntimes.add(future.get());
                     } catch (InterruptedException | ExecutionException | CancellationException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         timer.interruptExecutor();
                         currRuntimes.add(0.0);
                     }
@@ -156,7 +156,7 @@ public class BigOIt2 extends BigOIt2Base {
                 }
                 nValues.add(n);
                 runTimes.add(avgRuntime);
-                System.out.printf("n: %d, how many runs: %d, avg: %f, std: %f\n", nValues.get(nValues.size()-1), currRuntimes.size(), avgRuntime/(1_000_000.0), Math.sqrt(currRuntimes.stream().map(i -> Math.pow(i-avgRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(currRuntimes.size()-1))/(1_000_000.0));
+                //System.out.printf("n: %d, how many runs: %d, avg: %f, std: %f\n", nValues.get(nValues.size()-1), currRuntimes.size(), avgRuntime/(1_000_000.0), Math.sqrt(currRuntimes.stream().map(i -> Math.pow(i-avgRuntime, 2)).mapToDouble(Double::doubleValue).sum()/(currRuntimes.size()-1))/(1_000_000.0));
 
 
                 if (nValues.size() < 4) {
@@ -185,7 +185,7 @@ public class BigOIt2 extends BigOIt2Base {
 
                 for (int i=0; i<Math.min(10, ratios.size()/2); i++) {
                     if (Math.abs(meanRatio - ratios.get(i)) > std) {
-                        System.out.printf("std: %f", std);
+                        //System.out.printf("std: %f", std);
                         nValues.remove(i);
                         runTimes.remove(i);
                         ratios.remove(i);
@@ -196,7 +196,7 @@ public class BigOIt2 extends BigOIt2Base {
 
                 if (nValues.get(nValues.size()-1)>512 && Math.abs(meanRatio - ratio) > std * 2) {
                     ratio = ratios.remove(ratios.size()-1);
-                    ratios.add(ratios.size()-1, ratio + (ratio < meanRatio ? 0.1 : -0.1) * Math.abs(ratio - meanRatio));
+                    ratios.add(ratios.size()-1, (2*ratio + (ratio < meanRatio ? 0.1 : -0.1) * Math.abs(ratio - meanRatio))/2);
                 }
 
                 /*
@@ -223,12 +223,23 @@ public class BigOIt2 extends BigOIt2Base {
                 runTimes.remove(i);
                 ratios.remove(i);
             }
+            else if (Math.abs(meanRatio - ratios.get(i)) > std * 1.5) {
+                    double currRatio = ratios.remove(i);
+                    ratios.add(i, currRatio + (currRatio < meanRatio ? 0.1 : -0.1) * Math.abs(currRatio - meanRatio));
+            }
         }
         double ratio = weightedAverage(ratios);
+        //System.out.println(std/meanRatio);
+        if (nValues.size()<4 || std/meanRatio > 4) {
+            //System.out.println(std/meanRatio);
+            return Double.NaN;
+        }
+        //System.out.println("ratios");
+        //ratios.stream().forEach(element -> System.out.print(element + "\t"));
         //double ratio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         /*double slope = slopes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         double meanRatio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
-        double std = Math.sqrt(ratios.stream().map(i -> Math.pow(i-meanRatio, 2)).mapToDouble(Double::doubleValue).sum()/(ratios.size()));
+       */ /*double std = Math.sqrt(ratios.stream().map(i -> Math.pow(i-meanRatio, 2)).mapToDouble(Double::doubleValue).sum()/(ratios.size()));
         System.out.printf("Size is %d, and rsd is %f, std: %f, meanRunTime: %f", runTimes.size(), std, std, meanRatio);
         boolean hasConverged = ratios.stream()
         .skip(1) // Skip the first element
@@ -239,9 +250,6 @@ public class BigOIt2 extends BigOIt2Base {
             return relativeChange <= (0.1);
         });
         System.out.printf("has converged: %b", hasConverged);
-        if (runTimes.size() < 4) {
-            return Double.NaN;
-        }
         long endTime = System.nanoTime();
 
         //System.out.printf("ratio: %f, slope: %f", ratios.get(ratios.size()-1), slopes.get(slopes.size()-1));
@@ -254,7 +262,7 @@ public class BigOIt2 extends BigOIt2Base {
         System.out.printf("\n ratio avg: %f", ratio);
         System.out.printf("time: %f", (double) (endTime-startTime));
         System.out.printf("min n: %d", nValues.get(0));*/
-        return ratio;
+        return (2*ratio+meanRatio)/3;
         //return Math.pow(2, slopes.get(slopes.size()-1));
     }
 
