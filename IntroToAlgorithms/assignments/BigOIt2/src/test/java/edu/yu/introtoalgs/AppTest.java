@@ -58,4 +58,11 @@ public class AppTest
         double ratio = algTester.doublingRatio("edu.yu.introtoalgs.SumOfSquares", 60000);
         assertEquals(4.0, ratio, 0.1);
     }
+    @Test
+    public void shouldAnswerWithTrue3() {
+        BigOIt2 algTester = new BigOIt2();
+
+        double ratio = algTester.doublingRatio("edu.yu.introtoalgs.Linear", 60000);
+        assertEquals(1.0, ratio, 0.1);
+    }
 }
