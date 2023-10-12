@@ -89,7 +89,7 @@ public class BigOIt2 extends BigOIt2Base {
     public double doublingRatio(String bigOMeasurable, long timeOutInMs) throws IllegalArgumentException {
         long startTime = System.nanoTime();
         Timer timer = new Timer(timeOutInMs - 100);
-        int availableThreads = Runtime.getRuntime().availableProcessors()+2;
+        int availableThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(availableThreads);
         timer.start(executor);
         //ExecutorCompletionService<Double> completionService = new ExecutorCompletionService<>(executor);
@@ -170,22 +170,21 @@ public class BigOIt2 extends BigOIt2Base {
                 if (nValues.size() < 6) {
                     continue;
                 }
-                if (n > 8 && ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0) < 0.9) {// decreasing despite doubling n
+                /*if (n > 8 && ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0) < 0.9) {// decreasing despite doubling n
                     System.out.printf("error: %f, runtime less: %f, runtime more: %f", ratios.get(ratios.size()-1), runTimes.get(runTimes.size()-2), runTimes.get(runTimes.size()-1));
                     System.out.printf("n less: %d, n more: %d", nValues.get(nValues.size()-2), nValues.get(nValues.size()-1));
         
                     throw new IllegalArgumentException();
-                }
+                }*/
                 //double powerMSE = calculateSlope(nValues, runTimes, slopes, ratio);
                     
                 while (ratios.remove(Double.NaN)){};
 
-                double zScore = 1;
                 double meanRatio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
                 double std = Math.sqrt(ratios.stream().map(i -> Math.pow(i-meanRatio, 2)).mapToDouble(Double::doubleValue).sum()/(ratios.size()));
 
                 for (int i=0; i<Math.min(10, ratios.size()/2); i++) {
-                    if (Math.abs(meanRatio - ratios.get(i)) > std * zScore) {
+                    if (Math.abs(meanRatio - ratios.get(i)) > std) {
                         System.out.printf("std: %f", std);
                         nValues.remove(i);
                         runTimes.remove(i);
@@ -194,15 +193,12 @@ public class BigOIt2 extends BigOIt2Base {
                         break;
                     }
                 }
-                for (int i=0; i<ratios.size()/2; i++) {
-                    if (Math.abs(meanRatio - ratios.get(i)) > std * zScore * 2) {
-                        System.out.printf("std: %f", std);
-                        nValues.remove(i);
-                        runTimes.remove(i);
-                        ratios.remove(i);
-                        //slopes.remove(0);
-                    }
+
+                if (nValues.get(nValues.size()-1)>512 && Math.abs(meanRatio - ratio) > std * 2) {
+                    ratio = ratios.remove(ratios.size()-1);
+                    ratios.add(ratios.size()-1, ratio + (ratio < meanRatio ? 0.1 : -0.1) * Math.abs(ratio - meanRatio));
                 }
+
                 /*
                 double ratioMSE = IntStream.range(1, runTimes.size())
                 .mapToObj(i -> Math.pow(runTimes.get(i-1)*ratios.get(ratios.size()-1) - runTimes.get(i), 2))
@@ -218,10 +214,19 @@ public class BigOIt2 extends BigOIt2Base {
         finally {
             executor.shutdownNow();
         }
+        double meanRatio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
+        double std = Math.sqrt(ratios.stream().map(i -> Math.pow(i-meanRatio, 2)).mapToDouble(Double::doubleValue).sum()/(ratios.size()));
         
+        for (int i=0; i<ratios.size(); i++) {
+            if (Math.abs(meanRatio - ratios.get(i)) > std * 2) {
+                nValues.remove(i);
+                runTimes.remove(i);
+                ratios.remove(i);
+            }
+        }
         double ratio = weightedAverage(ratios);
         //double ratio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double slope = slopes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        /*double slope = slopes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         double meanRatio = ratios.stream().mapToDouble(Double::doubleValue).average().orElse(1.0);
         double std = Math.sqrt(ratios.stream().map(i -> Math.pow(i-meanRatio, 2)).mapToDouble(Double::doubleValue).sum()/(ratios.size()));
         System.out.printf("Size is %d, and rsd is %f, std: %f, meanRunTime: %f", runTimes.size(), std, std, meanRatio);
@@ -248,7 +253,7 @@ public class BigOIt2 extends BigOIt2Base {
         System.out.printf("n: %d", nValues.get(nValues.size()-1));
         System.out.printf("\n ratio avg: %f", ratio);
         System.out.printf("time: %f", (double) (endTime-startTime));
-        System.out.printf("min n: %d", nValues.get(0));
+        System.out.printf("min n: %d", nValues.get(0));*/
         return ratio;
         //return Math.pow(2, slopes.get(slopes.size()-1));
     }
