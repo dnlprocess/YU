@@ -225,7 +225,7 @@ public class BigOIt2 extends BigOIt2Base {
             }
             else if (Math.abs(meanRatio - ratios.get(i)) > std * 1.5) {
                     double currRatio = ratios.remove(i);
-                    ratios.add(i, currRatio + (currRatio < meanRatio ? 0.1 : -0.1) * Math.abs(currRatio - meanRatio));
+                    ratios.add(i, (2*currRatio + (currRatio < meanRatio ? 0.1 : -0.1) * Math.abs(currRatio - meanRatio))/2);
             }
         }
         double ratio = weightedAverage(ratios);
