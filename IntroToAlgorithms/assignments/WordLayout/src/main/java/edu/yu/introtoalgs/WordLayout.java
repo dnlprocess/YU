@@ -45,7 +45,10 @@ public class WordLayout extends WordLayoutBase {
                 return false;
             }
 
-            if ((node.rows >= word.length() || node.rows >= word.length()) && (node.rows >0 && node.columns>0) && node.isLeaf) {
+            System.out.printf("length: %d, rows: %d, cols: %d, leaf: %s\n", word.length(), node.rows, node.columns, node.isLeaf);
+
+            if ((node.rows >= word.length() || node.columns >= word.length()) && (node.rows >0 && node.columns>0) && node.isLeaf) {
+                System.out.println("inner");
                 addWordTree(word, node);
                 return true;
             }
@@ -57,7 +60,7 @@ public class WordLayout extends WordLayoutBase {
             if (put(word, node.right)){
                 return true;
             }
-
+            System.out.println("tried");
             return false;
         }
 
@@ -80,7 +83,7 @@ public class WordLayout extends WordLayoutBase {
                 System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
                     this.grid.grid[offsetRow][offsetCol+i]=chars[i];
-                    locs.add(new LocationBase(offsetRow, offsetCol+i));
+                    locs.add(new LocationBase(offsetCol+i, offsetRow));
                 }
 
                 int nextOffsetRow = offsetRow + 1;
@@ -94,7 +97,7 @@ public class WordLayout extends WordLayoutBase {
                 System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
                     this.grid.grid[offsetRow+i][offsetCol]=chars[i];
-                    locs.add(new LocationBase(offsetRow+i, offsetCol));
+                    locs.add(new LocationBase(offsetCol, offsetRow+i));
                 }
 
                 int nextOffsetRow = offsetRow + chars.length;
@@ -132,7 +135,7 @@ public class WordLayout extends WordLayoutBase {
         this.wordTree = new WordTree(nRows, nColumns, this.wordsGrid, this.wordLocations);
 
         List<String> entries = new ArrayList<>(words);
-        Collections.sort(entries, (a, b)->Integer.compare(a.length(), b.length()));
+        Collections.sort(entries, (a, b)->Integer.compare(b.length(), a.length()));
 
 
         for (String word: entries) {
