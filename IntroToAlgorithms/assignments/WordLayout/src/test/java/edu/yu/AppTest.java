@@ -28,17 +28,17 @@ public class AppTest
         final int nRows =3;
         final int nColumns =3;
         final List<String> words = List.of("CAT", "DOG", "BOB");
-        logger.info("Using this list of words: {}" , words);
+        logger.error("Using this list of words: {}" , words);
 
         final WordLayoutBase layout = new WordLayout(nRows, nColumns, words);
         for (String word: words) {
             final List<LocationBase> locations = layout.locations(word);
-            logger.info("Locations for word {}: {}", word, locations);
+            logger.error("Locations for word {}: {}", word, locations);
         }
 
         final Grid grid = layout . getGrid ();
-        logger.info("The filled in grid: {}" , grid );
-        logger.info("succes");
+        logger.error("The filled in grid: {}" , grid );
+        logger.error("succes");
 
     }
 }

@@ -13,6 +13,7 @@ public class WordLayout extends WordLayoutBase {
         private class Node {
             private Node left;
             private Node right;
+            public boolean isLeaf;
             public int rows, columns;
             public int rowOffset, colOffset;
 
@@ -21,6 +22,7 @@ public class WordLayout extends WordLayoutBase {
                 this.columns = nColumns;
                 this.rowOffset = rowOffset;
                 this.colOffset = colOffset;
+                this.isLeaf = true;
             }
         }
 
@@ -43,12 +45,16 @@ public class WordLayout extends WordLayoutBase {
                 return false;
             }
 
-            if ((node.rows >= word.length() || node.rows >= word.length()) && (node.rows >0 && node.columns>0)) {
+            if ((node.rows >= word.length() || node.rows >= word.length()) && (node.rows >0 && node.columns>0) && node.isLeaf) {
                 addWordTree(word, node);
                 return true;
             }
 
-            if (put(word, node.left) || put(word, node.right)){
+            if (put(word, node.left)){
+                return true;
+            }
+
+            if (put(word, node.right)){
                 return true;
             }
 
@@ -60,7 +66,9 @@ public class WordLayout extends WordLayoutBase {
             List<LocationBase> locs = new ArrayList<>();
 
             int[] remainders = {node.rows - chars.length, node.columns - chars.length};
-            int orientation = (Math.max(remainders[0], remainders[1]) == node.rows - chars.length) ? 0 : 1;
+            int orientation = (Math.max(remainders[0], remainders[1]) == node.rows - chars.length)? 0 : 1;
+            System.out.println(word);
+            System.out.printf("rem[0]: %d, rem[1]: %d, orien: %d\n", remainders[0], remainders[1], orientation);
             int offsetRow = node.rowOffset;
             int offsetCol = node.colOffset;
 
@@ -69,30 +77,34 @@ public class WordLayout extends WordLayoutBase {
 
 
             if (orientation==1) {//word is layed horizontally
+                System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
-                    this.grid.grid[offsetRow+i][offsetCol+1]=chars[i];
-                    locs.add(new LocationBase(offsetRow+i, offsetCol+1));
+                    this.grid.grid[offsetRow][offsetCol+i]=chars[i];
+                    locs.add(new LocationBase(offsetRow, offsetCol+i));
                 }
 
-                offsetRow += 1;
-                offsetCol += chars.length;
+                int nextOffsetRow = offsetRow + 1;
+                int nextOffsetCol = offsetCol + chars.length;
 
-                node.left = new Node(remainRow, chars.length, offsetRow, offsetCol);
-                node.right = new Node(node.rows, remainCol, offsetRow, offsetCol);
+                node.left = new Node(remainRow, chars.length, nextOffsetRow, offsetCol);
+                node.right = new Node(node.rows, remainCol, offsetRow, nextOffsetCol);
+                System.out.println("left");
             }
             else {//orientation==0, vertical over rows
+                System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
-                    this.grid.grid[offsetRow+1][offsetCol+i]=chars[i];
-                    locs.add(new LocationBase(offsetRow+1, offsetCol+i));
+                    this.grid.grid[offsetRow+i][offsetCol]=chars[i];
+                    locs.add(new LocationBase(offsetRow+i, offsetCol));
                 }
 
-                offsetRow += chars.length;
-                offsetCol += 1;
+                int nextOffsetRow = offsetRow + chars.length;
+                int nextOffsetCol = offsetCol + 1;
 
-                node.left = new Node(chars.length, remainCol, offsetRow, offsetCol);
-                node.right = new Node(remainRow, node.columns, offsetRow, offsetCol);
+                node.left = new Node(chars.length, remainCol, offsetRow, nextOffsetCol);
+                node.right = new Node(remainRow, node.columns, nextOffsetRow, offsetCol);
+                System.out.println("right");
             }
-
+            node.isLeaf = false;
             this.wordLocations.put(word, locs);
 
             //case 1: horizontally fits
