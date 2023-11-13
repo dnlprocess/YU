@@ -45,7 +45,7 @@ public class WordLayout extends WordLayoutBase {
                 return false;
             }
 
-            System.out.printf("length: %d, rows: %d, cols: %d, leaf: %s\n", word.length(), node.rows, node.columns, node.isLeaf);
+            //System.out.printf("length: %d, rows: %d, cols: %d, leaf: %s\n", word.length(), node.rows, node.columns, node.isLeaf);
 
             if ((node.rows >= word.length() || node.columns >= word.length()) && (node.rows >0 && node.columns>0) && node.isLeaf) {
                 System.out.println("inner");
@@ -60,7 +60,7 @@ public class WordLayout extends WordLayoutBase {
             if (put(word, node.right)){
                 return true;
             }
-            System.out.println("tried");
+            //System.out.println("tried");
             return false;
         }
 
@@ -70,8 +70,8 @@ public class WordLayout extends WordLayoutBase {
 
             int[] remainders = {node.rows - chars.length, node.columns - chars.length};
             int orientation = (Math.max(remainders[0], remainders[1]) == node.rows - chars.length)? 0 : 1;
-            System.out.println(word);
-            System.out.printf("rem[0]: %d, rem[1]: %d, orien: %d\n", remainders[0], remainders[1], orientation);
+            //System.out.println(word);
+            //System.out.printf("rem[0]: %d, rem[1]: %d, orien: %d\n", remainders[0], remainders[1], orientation);
             int offsetRow = node.rowOffset;
             int offsetCol = node.colOffset;
 
@@ -83,7 +83,7 @@ public class WordLayout extends WordLayoutBase {
                 System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
                     this.grid.grid[offsetRow][offsetCol+i]=chars[i];
-                    locs.add(new LocationBase(offsetCol+i, offsetRow));
+                    locs.add(new LocationBase(offsetRow, offsetCol+i));
                 }
 
                 int nextOffsetRow = offsetRow + 1;
@@ -91,13 +91,13 @@ public class WordLayout extends WordLayoutBase {
 
                 node.left = new Node(remainRow, chars.length, nextOffsetRow, offsetCol);
                 node.right = new Node(node.rows, remainCol, offsetRow, nextOffsetCol);
-                System.out.println("left");
+                //System.out.println("left");
             }
             else {//orientation==0, vertical over rows
-                System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
+                //System.out.printf("offset row: %d, offet column: %d\n", offsetRow, offsetCol);
                 for (int i=0; i<chars.length; i++) {
                     this.grid.grid[offsetRow+i][offsetCol]=chars[i];
-                    locs.add(new LocationBase(offsetCol, offsetRow+i));
+                    locs.add(new LocationBase(offsetRow+i, offsetCol));
                 }
 
                 int nextOffsetRow = offsetRow + chars.length;
