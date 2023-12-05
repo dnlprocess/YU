@@ -41,13 +41,14 @@ public abstract class TxBase implements Comparable<TxBase> {
   
   @Override
   public String toString() {
-    return "Tx{" +
+    return "id=" + id();/*
+    "Tx{" +
       "sender=" + sender() +
       ", receiver=" + receiver() +
       ", amount=" + amount() +
       ", id=" + id() +
       ", time=" + time() +
-      '}';
+      '}';*/
   }
 
   @Override

@@ -31,8 +31,6 @@ public class TxSortFJ extends TxSortFJBase {
 
         @Override
         public void compute() {
-            int span = high - low;
-
             /*Tx pivot = array[low + rand.nextInt(span)];
 
             int i = (low - 1);
@@ -45,14 +43,14 @@ public class TxSortFJ extends TxSortFJBase {
             }
             swap(arr, i + 1, high);*/
 
-            if (span <= threshhold) {
+            if (high-low <= threshhold) {
                 sortSequentially(array, low, high);
             } // sequential processing
             else {
                 int partitionIndex = partition(array, low, high, rand);
 
-                SortFJ left = new SortFJ(threshold, array, low, partitionIndex);
-                SortFJ right = new SortFJ(threshold, array, partitionIndex+2, high);
+                SortFJ left = new SortFJ(threshhold, array, low, partitionIndex);
+                SortFJ right = new SortFJ(threshhold, array, partitionIndex+1, high);
 
                 left.fork();
                 right.compute();
@@ -60,59 +58,57 @@ public class TxSortFJ extends TxSortFJBase {
 
             }
         }
+
+        private int partition(TxBase[] array, int low, int high, Random rand) {
+            int index = low + rand.nextInt(high-low);
+            TxBase pivot = array[index];
+            swap(array, index, high-1);
+            int i = low - 1;
+
+            for (int j = low; j < high-1; j++) {
+                if (pivot.compareTo(array[j])>0) {
+                    i++;
+                    swap(array, i, j);
+                }
+            }
+
+            swap(array, i + 1, high-1);
+            return i + 1;
+        }//Partition for quicksort around random element to eliminate need for shuffling
+
+        private void swap(TxBase[] array, int low, int high) {
+            TxBase temp = array[low];
+            array[low] = array[high];
+            array[high] = temp;
+        }
+
+        private void sortSequentially(TxBase[] array, int low, int high) {
+            for (int i = 1+low; i < high; ++i) {
+                TxBase pivot = array[i];
+                int j = i - 1;
+        
+                while (j >= low && pivot.compareTo(array[j])<0) {
+                    array[j + 1] = array[j];
+                    j = j - 1;
+                }
+                array[j + 1] = pivot;
+            }
+        }//insertion sort
+
     }
 
     TxBase[] txs;
 
-    private int partition(Tx[] array, int low, int high, Random rand) {
-        int index = low + rand.nextInt(span);
-        TxBase pivot = array[index];
-        int i = low - 1;
-
-        for (int j = low; j < high; j++) {
-            if (j==index) {
-                continue;
-            }
-            if (pivot.compareTo(array[j])) {
-                i++;
-                swap(array, i, j);
-            }
-        }
-
-        swap(array, i + 1, index);
-        return i + 1;
-    }//Partition for quicksort around random element to eliminate need for shuffling
-
-    private void swap(TxBase[] array, int low, int high) {
-        TxBase temp = array[low];
-        array[low] = array[high];
-        array[high] = temp;
-    }
-
-    private void sortSequentially(int low, int high) {
-        int span = high - low;
-        for (int i = 1; i < span; ++i) {
-            TxBase pivot = arr[i];
-            int j = i - 1;
     
-            while (j >= 0 && pivot.compareTo(arr[j])) {
-                arr[j + 1] = arr[j];
-                j = j - 1;
-            }
-            arr[j + 1] = key;
-        }
-    }//insertion sort
-
 	public TxSortFJ(List<TxBase> transactions) {
 		super(transactions);
-        this.txs = transactions.toArray();
-		parallelism = Runtime.getRuntime().availableProcessors();
-        threshold = parallelism*2;
-        SortFJ task = new SortFJ(threshold, txs, 0, txs.length);
+        this.txs = transactions.toArray(new TxBase[transactions.size()]);
+		int parallelism = Runtime.getRuntime().availableProcessors();
+        int threshhold = parallelism*2;
+        SortFJ task = new SortFJ(threshhold, txs, 0, txs.length);
         final ForkJoinPool fjPool = new ForkJoinPool(parallelism);
-        parallelSum = fjPool.invoke(task);
+        fjPool.invoke(task);
         fjPool.shutdown();
-        this.txs = transactions;
 	}
     
     /** Returns an array of transactions, sorted in ascending order of

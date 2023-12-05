@@ -16,6 +16,7 @@ public class Tx extends TxBase {
     private static AtomicInteger nextTxId = new AtomicInteger(1);
 
     public Tx(Account sender, Account receiver, int amount) {
+        super(sender, receiver, amount);
         if (sender==null || receiver==null || amount<=0) {
             throw new IllegalArgumentException();
         }
@@ -62,15 +63,16 @@ public class Tx extends TxBase {
         if (other == null) {
             throw new IllegalArgumentException();
         }
+        return (int) ((int) this.id()-other.id());
         
-		if (this.time == null && other.time == null) {
+		/*if (this.time == null && other.time() == null) {
             return 0;
         } else if (this.time == null) {
             return -1;
-        } else if (other.time == null) {
+        } else if (other.time() == null) {
             return 1;
         }
 
-        return this.time.compareTo(other.time);
+        return this.time.compareTo(other.time());*/
     }
 }
