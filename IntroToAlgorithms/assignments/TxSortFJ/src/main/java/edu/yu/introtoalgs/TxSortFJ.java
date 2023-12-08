@@ -1,10 +1,8 @@
 package edu.yu.introtoalgs;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 import edu.yu.introtoalgs.TxBase;
 import edu.yu.introtoalgs.TxSortFJBase;
@@ -31,38 +29,27 @@ public class TxSortFJ extends TxSortFJBase {
 
         @Override
         public void compute() {
-            /*Tx pivot = array[low + rand.nextInt(span)];
-
-            int i = (low - 1);
-
-            for (int j = low; j <= high - 1; j++) {
-                if (pivot.compareTo(array[j])) {
-                    i++;
-                    swap(arr, i, j);
-                }
-            }
-            swap(arr, i + 1, high);*/
-
             if (high-low <= threshhold) {
-                sortSequentially(array, low, high);
+                sortSequentialInsertion(array, low, high);
             } // sequential processing
             else {
-                int partitionIndex = partition(array, low, high, rand);
+                int partitionIndex = quickPartition(array, low, high, rand);
 
                 SortFJ left = new SortFJ(threshhold, array, low, partitionIndex);
-                SortFJ right = new SortFJ(threshhold, array, partitionIndex+1, high);
+                SortFJ right = new SortFJ(threshhold, array, partitionIndex+1, high);//Do not need to sort pivot
 
                 left.fork();
                 right.compute();
                 left.join();
-
             }
         }
 
-        private int partition(TxBase[] array, int low, int high, Random rand) {
+        private int quickPartition(TxBase[] array, int low, int high, Random rand) {
             int index = low + rand.nextInt(high-low);
+
             TxBase pivot = array[index];
-            swap(array, index, high-1);
+            swap(array, index, high-1);//Put pivot to side
+
             int i = low - 1;
 
             for (int j = low; j < high-1; j++) {
@@ -82,10 +69,10 @@ public class TxSortFJ extends TxSortFJBase {
             array[high] = temp;
         }
 
-        private void sortSequentially(TxBase[] array, int low, int high) {
-            for (int i = 1+low; i < high; ++i) {
-                TxBase pivot = array[i];
-                int j = i - 1;
+        private void sortSequentialInsertion(TxBase[] array, int low, int high) {
+            for (int i = low; i < high-1; i++) {
+                TxBase pivot = array[i+1];
+                int j = i;
         
                 while (j >= low && pivot.compareTo(array[j])<0) {
                     array[j + 1] = array[j];
@@ -104,7 +91,7 @@ public class TxSortFJ extends TxSortFJBase {
 		super(transactions);
         this.txs = transactions.toArray(new TxBase[transactions.size()]);
 		int parallelism = Runtime.getRuntime().availableProcessors();
-        int threshhold = parallelism*2;
+        int threshhold = 10;
         SortFJ task = new SortFJ(threshhold, txs, 0, txs.length);
         final ForkJoinPool fjPool = new ForkJoinPool(parallelism);
         fjPool.invoke(task);

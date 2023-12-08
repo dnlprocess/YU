@@ -60,12 +60,7 @@ public class Tx extends TxBase {
 
     @Override
      public int compareTo(TxBase other) {
-        if (other == null) {
-            throw new IllegalArgumentException();
-        }
-        return (int) ((int) this.id()-other.id());
-        
-		/*if (this.time == null && other.time() == null) {
+        if (this.time == null && other.time() == null) {
             return 0;
         } else if (this.time == null) {
             return -1;
@@ -73,6 +68,6 @@ public class Tx extends TxBase {
             return 1;
         }
 
-        return this.time.compareTo(other.time());*/
+        return this.time.compareTo(other.time());
     }
 }

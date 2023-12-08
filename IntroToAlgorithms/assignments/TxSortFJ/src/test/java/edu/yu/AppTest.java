@@ -7,7 +7,6 @@ import edu.yu.introtoalgs.TxSortFJ;
 import edu.yu.introtoalgs.Account;
 
 import java.util.List;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,8 +37,8 @@ public class AppTest
      */
     @Test
     public void demo() {
-        final int nAccounts = 20;
-        final int nTxs = 30;
+        final int nAccounts = 900000;
+        final int nTxs = 9000000;
         final List<TxBase> txs = new ArrayList<>();
         final Account[] accounts = new Account [nAccounts];
 
@@ -57,18 +56,32 @@ public class AppTest
         Collections.shuffle(txs);
         logger.info("Created {} Txs" , txs.size());
         TxBase[] txArray = txs.toArray(new TxBase[txs.size()]);
-        //boolean isSorted = isSorted(txArray);
-        //assertTrue(isSorted);
+
+        //Normal Sort
+        final TxBase[] aTxs = txs.toArray(new TxBase[txs.size()]);
+        long start = System.nanoTime();
+        Arrays.sort(aTxs);
+        System.out.printf("Arrays Reg: %,d nanoseconds%n", System.nanoTime()-start);
+        boolean isSorted = isSorted(aTxs);
+        //System.out.println(Arrays.toString(aTxs));
+        assertTrue(isSorted);
+        
+        //Arrays Parallel
         final TxBase[] pTxs = txs.toArray(new TxBase[txs.size()]);
+        start = System.nanoTime();
         Arrays.parallelSort(pTxs);
-        boolean isSorted = isSorted(pTxs);
-        System.out.println(Arrays.toString(pTxs));
+        System.out.printf("Arrays Parallel: %,d nanoseconds%n", System.nanoTime()-start);
+        isSorted = isSorted(pTxs);
+        //System.out.println(Arrays.toString(pTxs));
         assertTrue(isSorted);
 
+        //FJ Parallel
+        start = System.nanoTime();
         final TxSortFJBase txSortFJ = new TxSortFJ(txs);
         final TxBase[] fjTxs = txSortFJ.sort();
+        System.out.printf("Daniel Parallel: %,d nanoseconds%n", System.nanoTime()-start);
         isSorted = isSorted(fjTxs);
-        System.out.println(Arrays.toString(fjTxs));
+        //System.out.println(Arrays.toString(fjTxs));
         assertTrue(isSorted);
         try {
             //final TxSortFJBase txSortFJ = new TxSortFJ(txs);
