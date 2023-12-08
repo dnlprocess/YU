@@ -85,7 +85,7 @@ public class TxSortFJ extends TxSortFJBase {
 
     }
 
-    TxBase[] txs;
+    private TxBase[] txs;
 
     
 	public TxSortFJ(List<TxBase> transactions) {
