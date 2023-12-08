@@ -84,13 +84,13 @@ public class AppTest
         assertTrue(isSorted);
 
         //FJ Parallel
-        final TxSortFJBase txSortFJ = new TxSortFJ(txs);
         start = System.nanoTime();
+        final TxSortFJBase txSortFJ = new TxSortFJ(txs);
         final TxBase[] fjTxs = txSortFJ.sort();
         System.out.printf("Daniel Parallel: %,d nanoseconds%n", System.nanoTime()-start);
         isSorted = isSorted(fjTxs);
         //fjTxs = Arrays.copyOfRange(fjTxs, 0, 5000);
-        System.out.println(Arrays.toString(fjTxs));
+        //System.out.println(Arrays.toString(fjTxs));
         assertTrue(isSorted);
         try {
             //final TxSortFJBase txSortFJ = new TxSortFJ(txs);
