@@ -47,12 +47,20 @@ public class AppTest
         }
         logger.info("Created {} Accounts", nAccounts);
 
+        TxBase account;
         for (int i=0; i<nTxs; i++) {
-            // being silly here: no point in making this look more real
             final Account account1 = accounts[rand.nextInt(0, nAccounts)];
             final Account account2 = accounts[rand.nextInt(0, nAccounts)];
-            txs.add(new Tx(account1, account2 , 1));
+            account = new Tx(account1, account2 , 1);
+
+            if (i%1050==0) {
+                account.setTimeToNull();
+            }
+
+            txs.add(account);
         }
+
+
         Collections.shuffle(txs);
         logger.info("Created {} Txs" , txs.size());
         TxBase[] txArray = txs.toArray(new TxBase[txs.size()]);
@@ -76,12 +84,13 @@ public class AppTest
         assertTrue(isSorted);
 
         //FJ Parallel
-        start = System.nanoTime();
         final TxSortFJBase txSortFJ = new TxSortFJ(txs);
+        start = System.nanoTime();
         final TxBase[] fjTxs = txSortFJ.sort();
         System.out.printf("Daniel Parallel: %,d nanoseconds%n", System.nanoTime()-start);
         isSorted = isSorted(fjTxs);
-        //System.out.println(Arrays.toString(fjTxs));
+        //fjTxs = Arrays.copyOfRange(fjTxs, 0, 5000);
+        System.out.println(Arrays.toString(fjTxs));
         assertTrue(isSorted);
         try {
             //final TxSortFJBase txSortFJ = new TxSortFJ(txs);

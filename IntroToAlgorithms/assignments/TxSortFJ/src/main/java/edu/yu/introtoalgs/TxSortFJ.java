@@ -17,14 +17,15 @@ public class TxSortFJ extends TxSortFJBase {
         private final int low;
         private final int high;
         private final int threshhold;
-        private final Random rand = new Random();
+        private final Random rand;
         private final TxBase[] array;
 
-        public SortFJ(int threshhold, TxBase[] array, int low, int high) {
+        public SortFJ(int threshhold, TxBase[] array, int low, int high, Random rand) {
             this.threshhold = threshhold;
             this.array = array;
             this.low = low;
             this.high = high;
+            this.rand = rand;
         }
 
         @Override
@@ -35,8 +36,8 @@ public class TxSortFJ extends TxSortFJBase {
             else {
                 int partitionIndex = quickPartition(array, low, high, rand);
 
-                SortFJ left = new SortFJ(threshhold, array, low, partitionIndex);
-                SortFJ right = new SortFJ(threshhold, array, partitionIndex+1, high);//Do not need to sort pivot
+                SortFJ left = new SortFJ(threshhold, array, low, partitionIndex, rand);
+                SortFJ right = new SortFJ(threshhold, array, partitionIndex+1, high, rand);//Do not need to sort pivot
 
                 left.fork();
                 right.compute();
@@ -92,7 +93,7 @@ public class TxSortFJ extends TxSortFJBase {
         this.txs = transactions.toArray(new TxBase[transactions.size()]);
 		int parallelism = Runtime.getRuntime().availableProcessors();
         int threshhold = 10;
-        SortFJ task = new SortFJ(threshhold, txs, 0, txs.length);
+        SortFJ task = new SortFJ(threshhold, txs, 0, txs.length, new Random());
         final ForkJoinPool fjPool = new ForkJoinPool(parallelism);
         fjPool.invoke(task);
         fjPool.shutdown();
