@@ -121,7 +121,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
    */
   public double goalCost() {
     // in other words largest distTo that fulfills condition
-    if (goal == null) {
+    if (goal == null || this.found == false) {
       return 0.0;
     }
     return distTo.get(goal);
@@ -139,7 +139,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
    * doesn't contain a longest valid path.
    */
   public List<String> getOneLongestPath() {
-    if (goal == null) {
+    if (goal == null || this.found == false) {
       return Collections.EMPTY_LIST;
     }
     return lesser;
@@ -157,7 +157,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
    * graph doesn't contain a longest valid path.
    */
   public List<String> getOtherLongestPath() {
-    if (goal == null) {
+    if (goal == null || this.found == false) {
       return Collections.EMPTY_LIST;
     }
 
