@@ -1,4 +1,4 @@
-package edu.yu.da;
+package edu.yu.da.ThereAndBackAgain;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,7 +38,6 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     HashMap<String, List<Edge>> graph;
     HashMap<String, Double> distTo;
     HashMap<String, List<String>> edgeTo;
-    PriorityQueue<List<String>> paths;//need to define new compator
     
     /** Constructor which supplies the start vertex
    *
@@ -58,8 +57,6 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
 
     this.distTo = new HashMap<>();
     this.distTo.put(startVertex, 0.0);
-
-    this.paths = new PriorityQueue<>();
   }
 
   /** Adds an weighted undirected edge between vertex v and vertex w.  The two
@@ -187,7 +184,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
       if (visited.contains(current.dest)) {
         continue;
       }
-
+      System.out.printf("Current: %s, distance: %.2f, paths: %d\n", current.dest, this.distTo.get(current.dest), pathCount.get(current.dest));
       visited.add(current.dest);
       
       for (Edge edge: this.graph.get(current.dest)) {
@@ -197,9 +194,13 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
           pq.remove(edge);
           pq.add(edge);
           pathCount.put(edge.dest, pathCount.get(current.dest));
-          this.edgeTo.computeIfAbsent(edge.dest, k -> new ArrayList<>()).add(current.dest);
+          this.edgeTo.put(edge.dest, new ArrayList<>());
+          this.edgeTo.get(edge.dest).add(current.dest);
         } else if (distTo.get(edge.dest) == tempDist) {
           pathCount.put(edge.dest, pathCount.get(edge.dest)+pathCount.get(current.dest));
+          this.edgeTo.get(edge.dest).add(current.dest);
+          System.out.printf("Alternate path to: %s through %s\n", edge.dest, current.dest);
+         // System.out.printf("Prior path to: %s through %s\n", edge.dest, this.edgeTo.get(edge.dest).get(0));
         }
       }
     }
@@ -216,48 +217,64 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
         break;
       }
     }
+
+    for (String node: sortedNodes) {
+      System.out.printf("Node: %s, dist: %.2f, paths: .2f\n", node, distTo.get(node), pathCount.get(node));
+    }
+
     if (goal == null) {
       return;
     }
     pathTo(goal);
-
   }
 
   private void pathTo(String goal) {
-    Stack<List<String>> stack = new Stack<>();
-    stack.push(new ArrayList<>(List.of(goal))); 
+    List<String> path = new ArrayList<>();
+    path.add(goal);
+    System.out.printf("goal: %s\n", goal);
 
-    List<List<String>> resultPaths = new ArrayList<>();
-
-    while (!stack.isEmpty()) {
-      List<String> currentPath = stack.pop();
-      String current = currentPath.get(0);
-      boolean forked = false;
-
-      if (current.equals(start)) {//base case
-        resultPaths.add(currentPath);
-      } else {
-        List<String> currentPredecessors = edgeTo.get(current);
-
-        int predecessorsToConsider = (forked) ? 1 : 2;
-
-        for (int i=0; i<predecessorsToConsider; i++) {
-          List<String> newPath = new ArrayList<>(currentPath);
-          newPath.add(0, currentPredecessors.get(i));
-          stack.push(newPath);
-        }
-        if (currentPredecessors.size() > 1 && !forked) {
-          forked = true;
-        }
-      }
+    List<String> current;
+    for (current = edgeTo.get(goal); current.size() == 1; current = edgeTo.get(current.get(0))) {
+      path.add(current.get(0));
     }
 
-    if (resultPaths.get(0).hashCode() < resultPaths.get(1).hashCode()) {
-      this.lesser = resultPaths.get(0);
-      this.greater = resultPaths.get(1);
+    List<String> path1 = processRest(current.get(0));
+    List<String> path2 = processRest(current.get(1));
+
+    path1.addAll(0, path);
+    path2.addAll(0, path);
+
+    Collections.reverse(path1);
+    Collections.reverse(path2);
+
+    printList(path1);
+    printList(path2);
+    
+    if (path1.hashCode() < path2.hashCode()) {
+      this.lesser = path1;
+      this.greater = path2;
     } else {
-      this.lesser = resultPaths.get(1);
-      this.greater = resultPaths.get(0);
+      this.lesser = path2;
+      this.greater = path1;
     }
+  }
+
+  private List<String> processRest(String curr) {
+    List<String> path = new ArrayList<>();
+    path.add(curr);
+    List<String> current;
+    for (current = edgeTo.get(curr); !current.get(0).equals(this.start); current = edgeTo.get(current.get(0))) {
+      path.add(current.get(0));
+    }
+    path.add(current.get(0));
+
+    return path;
+  }
+
+  private void printList(List<String> path) {
+    for (String element : path) {
+      System.out.printf("%s, ", element);
+    }
+    System.out.println();
   }
 }
