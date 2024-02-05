@@ -1,0 +1,263 @@
+package edu.yu.da;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class ThereAndBackAgain extends ThereAndBackAgainBase {
+  // Add edges into the SP subset the usual way making sure to use <= to allow edges of the same length.
+  // Once Dijkstra is done, the distTo is known. Sort in VlogV. Now using priority queue push edges from largest distance 
+  // need to find way back maybe in parallel choosing edges based on different criterion using hashin perhaps
+  // if there is at least one different we are succesful otherwise 
+  // keep track of edge from
+  // any other return path in SP graph is by definition the same length - if longer would not be, if shorter the initial path would not be
+
+    private static class Edge implements Comparable<Edge> {
+      String dest;
+      double weight;
+
+      public Edge(String dest, double weight) {
+          this.dest = dest;
+          this.weight = weight;
+      }
+
+      @Override
+      public int compareTo(Edge otherEdge) {
+        return Double.compare(this.weight, otherEdge.weight);
+      }
+      
+
+    }
+
+    boolean found;
+    String start;
+    String goal;
+    List<String> lesser;
+    List<String> greater;
+
+
+    HashMap<String, List<Edge>> graph;
+    HashMap<String, Double> distTo;
+    HashMap<String, List<String>> edgeTo;
+    PriorityQueue<List<String>> paths;//need to define new compator
+    
+    /** Constructor which supplies the start vertex
+   *
+   * @param startVertex, length must be > 0.
+   * @throws IllegalArgumentException if the pre-condiitions are
+   * violated
+   */
+  public ThereAndBackAgain(String startVertex) {
+    super(startVertex);
+    this.found = false;
+
+    validate(startVertex);
+    this.start = startVertex;
+
+    this.graph = new HashMap<>();
+    this.graph.put(startVertex, new ArrayList<>());
+
+    this.distTo = new HashMap<>();
+    this.distTo.put(startVertex, 0.0);
+
+    this.paths = new PriorityQueue<>();
+  }
+
+  /** Adds an weighted undirected edge between vertex v and vertex w.  The two
+   * vertices must differ from one another, and an edge between the two
+   * vertices cannot have been added previously.
+   *
+   * @param v specifies a vertex, length must be > 0.
+   * @param w specifies a vertex, length must be > 0.
+   * @param weight the edge's weight, must be > 0.
+   * @throws IllegalStateException if doIt() has previously been invoked.
+   * @throws IllegalArgumentException if the other pre-conditions are violated.
+   */
+  public void addEdge(String v, String w, double weight) {
+    validate(v);
+    validate(w);
+    validate(weight);
+
+    this.graph.computeIfAbsent(v, k -> new ArrayList<Edge>()).add(new Edge(w, weight));
+    this.graph.computeIfAbsent(w, k -> new ArrayList<Edge>()).add(new Edge(v, weight));
+
+    this.distTo.putIfAbsent(v, Double.MAX_VALUE);
+    this.distTo.putIfAbsent(w, Double.MAX_VALUE);
+  }
+  
+  /** Client informs implementation that the graph is fully constructed and
+   * that the ThereAndBackAgainBase algorithm should be run on the graph.
+   * After the method completes, the client is permitted to invoke the
+   * solution's getters.
+   *
+   * Note: once invoked, the implementation must ignore subsequent calls to
+   * this method.
+   * @throws IllegalStateException if doIt() has previously been invoked.
+   */
+  public void doIt() {
+    if (this.found == true) return;
+
+    this.found = true;
+
+    dijkstra();
+  }
+
+  /** If the graph contains a "goal vertex of the longest valid path" (as
+   * defined by the requirements document), returns it.  Else returns null.
+   *
+   * @return goal vertex of the longest valid path if one exists, null
+   * otherwise.
+   */
+  public String goalVertex() {
+    return goal;
+  }
+
+  /** Returns the cost (sum of the edge weights) of the longest valid path if
+   * one exists, 0.0 otherwise.
+   *
+   * @return the cost if the graph contains a longest valid path, 0.0
+   * otherwise.
+   */
+  public double goalCost() {
+    // in other words largest distTo that fulfills condition
+    if (goal == null) {
+      return 0.0;
+    }
+    return distTo.get(goal);
+  }
+
+  /** If a longest valid path exists, returns a ordered sequence of vertices
+   * (beginning with the start vertex, and ending with the goal vertex)
+   * representing that path.
+   *
+   * IMPORTANT: given the existence of (by definition) two longest valid paths,
+   * this method returns the List with the LESSER of the two List.hashCode()
+   * instances.
+   *
+   * @return one of the two longest paths, Collections.EMPTY_LIST if the graph
+   * doesn't contain a longest valid path.
+   */
+  public List<String> getOneLongestPath() {
+    if (goal == null) {
+      return Collections.EMPTY_LIST;
+    }
+    return lesser;
+  }
+
+  /** If a longest valid path exists, returns the OTHER ordered sequence of
+   * vertices (beginning with the start vertex, and ending with the goal
+   * vertex) representing that path.
+   *
+   * IMPORTANT: given the existence of (by definition) two longest valid paths,
+   * this method returns the List with the GREATER of the two List.hashCode()
+   * instances.
+   *
+   * @return the other of the two longest paths, Collections.EMPTY_LIST if the
+   * graph doesn't contain a longest valid path.
+   */
+  public List<String> getOtherLongestPath() {
+    if (goal == null) {
+      return Collections.EMPTY_LIST;
+    }
+
+    return greater;
+  }
+
+  private void validate(String s) {
+    if (s.length() == 0) {
+        throw new IllegalArgumentException();
+    }
+  }
+  private void validate(double i) {
+    if (i <= 0) {
+        throw new IllegalArgumentException();
+    }
+  }
+
+  private void dijkstra() {
+    this.edgeTo = new HashMap<>();
+    HashMap<String, Integer> pathCount = new HashMap<>();
+    Set<String> visited = new HashSet<>();
+    PriorityQueue<Edge> pq = new PriorityQueue<>();
+    Edge source = new Edge(start, 0);
+    pq.add(source);
+    pathCount.put(source.dest,1);
+
+    while(!pq.isEmpty()) {
+      Edge current = pq.poll();
+      if (visited.contains(current.dest)) {
+        continue;
+      }
+
+      visited.add(current.dest);
+      
+      for (Edge edge: this.graph.get(current.dest)) {
+        double tempDist = distTo.get(current.dest) + edge.weight;
+        if (distTo.get(edge.dest) > tempDist) {
+          distTo.put(edge.dest, tempDist);
+          pq.remove(edge);
+          pq.add(edge);
+          pathCount.put(edge.dest, pathCount.get(current.dest));
+          this.edgeTo.computeIfAbsent(edge.dest, k -> new ArrayList<>()).add(current.dest);
+        } else if (distTo.get(edge.dest) == tempDist) {
+          pathCount.put(edge.dest, pathCount.get(edge.dest)+pathCount.get(current.dest));
+        }
+      }
+    }
+
+    List<String> sortedNodes = distTo.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+    for (String node: sortedNodes) {
+      if (pathCount.get(node) > 1) {
+        goal = node;
+        break;
+      }
+    }
+    if (goal == null) {
+      return;
+    }
+    pathTo(goal);
+
+  }
+
+  private void pathTo(String goal) {
+    Stack<List<String>> stack = new Stack<>();
+    stack.push(new ArrayList<>(List.of(goal))); 
+
+    List<List<String>> resultPaths = new ArrayList<>();
+
+    while (!stack.isEmpty()) {
+      List<String> currentPath = stack.pop();
+      String current = currentPath.get(0);
+      boolean forked = false;
+
+      if (current.equals(start)) {//base case
+        resultPaths.add(currentPath);
+      } else {
+        List<String> currentPredecessors = edgeTo.get(current);
+
+        int predecessorsToConsider = (forked) ? 1 : 2;
+
+        for (int i=0; i<predecessorsToConsider; i++) {
+          List<String> newPath = new ArrayList<>(currentPath);
+          newPath.add(0, currentPredecessors.get(i));
+          stack.push(newPath);
+        }
+        if (currentPredecessors.size() > 1 && !forked) {
+          forked = true;
+        }
+      }
+    }
+
+    if (resultPaths.get(0).hashCode() < resultPaths.get(1).hashCode()) {
+      this.lesser = resultPaths.get(0);
+      this.greater = resultPaths.get(1);
+    } else {
+      this.lesser = resultPaths.get(1);
+      this.greater = resultPaths.get(0);
+    }
+  }
+}
