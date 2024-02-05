@@ -235,7 +235,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     if (goal == null) {
       return;
     }
-    this.found = true;
+    //this.found = true;
     pathTo(goal);
   }
 
