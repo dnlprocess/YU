@@ -219,7 +219,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     }
 
     for (String node: sortedNodes) {
-      System.out.printf("Node: %s, dist: %.2f, paths: .2f\n", node, distTo.get(node), pathCount.get(node));
+      System.out.printf("Node: %s, dist: %.2f, paths: %.2f\n", node, distTo.get(node), pathCount.get(node));
     }
 
     if (goal == null) {
@@ -228,6 +228,8 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     pathTo(goal);
   }
 
+
+  // pathTo inspired by Sedgewick: https://algs4.cs.princeton.edu/44sp/DijkstraSP.java.html
   private void pathTo(String goal) {
     List<String> path = new ArrayList<>();
     path.add(goal);
