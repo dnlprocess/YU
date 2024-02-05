@@ -14,15 +14,20 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     private static class Edge implements Comparable<Edge> {
       String dest;
       double weight;
+      double dist;
 
       public Edge(String dest, double weight) {
           this.dest = dest;
           this.weight = weight;
       }
 
+      public void dist(double dist) {
+        this.dist = dist;
+      }
+
       @Override
       public int compareTo(Edge otherEdge) {
-        return Double.compare(this.weight, otherEdge.weight);
+        return Double.compare(this.dist, otherEdge.dist);
       }
       
 
@@ -176,6 +181,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     Set<String> visited = new HashSet<>();
     PriorityQueue<Edge> pq = new PriorityQueue<>();
     Edge source = new Edge(start, 0);
+    source.dist(0);
     pq.add(source);
     pathCount.put(source.dest,1);
 
@@ -190,8 +196,12 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
       for (Edge edge: this.graph.get(current.dest)) {
         double tempDist = distTo.get(current.dest) + edge.weight;
         if (distTo.get(edge.dest) > tempDist) {
+          if (edge.dest.equals("k")) {
+            System.out.printf("Path to: %s through %s, k is %.2f away\n", edge.dest, current.dest, tempDist);
+          }
           distTo.put(edge.dest, tempDist);
-          pq.remove(edge);
+          //pq.remove(edge);
+          edge.dist(tempDist);
           pq.add(edge);
           pathCount.put(edge.dest, pathCount.get(current.dest));
           this.edgeTo.put(edge.dest, new ArrayList<>());

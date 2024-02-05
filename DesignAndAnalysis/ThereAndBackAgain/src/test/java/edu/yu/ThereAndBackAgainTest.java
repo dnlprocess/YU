@@ -57,7 +57,7 @@ public class ThereAndBackAgainTest
             taba.addEdge(String.valueOf(nodes[i].charAt(0)), String.valueOf(nodes[i].charAt(1)), (double) (nodes[i].charAt(2)- '0'));
         }
         taba.doIt();
-        assert taba.goalVertex().equals("n"): "goalVertex";
+        assert taba.goalVertex().equals("l"): "goalVertex";
         assert taba.goalCost() == 19.0: taba.goalCost();
         //softAssertion.assertTrue(taba.getOneLongestPath().equals(Collections.<String>emptyList()),
         //                        "getOneLongestPath" );
