@@ -219,7 +219,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     }
 
     for (String node: sortedNodes) {
-      System.out.printf("Node: %s, dist: %.2f, paths: %.2f\n", node, distTo.get(node), pathCount.get(node));
+      System.out.printf("Node: %s, dist: %.2f, paths: %d\n", node, distTo.get(node), pathCount.get(node));
     }
 
     if (goal == null) {
