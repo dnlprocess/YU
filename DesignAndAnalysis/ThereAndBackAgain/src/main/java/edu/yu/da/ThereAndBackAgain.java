@@ -1,4 +1,4 @@
-package edu.yu.da.ThereAndBackAgain;
+package edu.yu.da;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -190,15 +190,15 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
       if (visited.contains(current.dest)) {
         continue;
       }
-      System.out.printf("Current: %s, distance: %.2f, paths: %d\n", current.dest, this.distTo.get(current.dest), pathCount.get(current.dest));
+      //System.out.printf("Current: %s, distance: %.2f, paths: %d\n", current.dest, this.distTo.get(current.dest), pathCount.get(current.dest));
       visited.add(current.dest);
       
       for (Edge edge: this.graph.get(current.dest)) {
         double tempDist = distTo.get(current.dest) + edge.weight;
         if (distTo.get(edge.dest) > tempDist) {
-          if (edge.dest.equals("k")) {
-            System.out.printf("Path to: %s through %s, k is %.2f away\n", edge.dest, current.dest, tempDist);
-          }
+          //if (edge.dest.equals("k")) {
+            //System.out.printf("Path to: %s through %s, k is %.2f away\n", edge.dest, current.dest, tempDist);
+          //}
           distTo.put(edge.dest, tempDist);
           //pq.remove(edge);
           edge.dist(tempDist);
@@ -209,7 +209,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
         } else if (distTo.get(edge.dest) == tempDist) {
           pathCount.put(edge.dest, pathCount.get(edge.dest)+pathCount.get(current.dest));
           this.edgeTo.get(edge.dest).add(current.dest);
-          System.out.printf("Alternate path to: %s through %s\n", edge.dest, current.dest);
+          //System.out.printf("Alternate path to: %s through %s\n", edge.dest, current.dest);
          // System.out.printf("Prior path to: %s through %s\n", edge.dest, this.edgeTo.get(edge.dest).get(0));
         }
       }
@@ -228,9 +228,9 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
       }
     }
 
-    for (String node: sortedNodes) {
-      System.out.printf("Node: %s, dist: %.2f, paths: %d\n", node, distTo.get(node), pathCount.get(node));
-    }
+    //for (String node: sortedNodes) {
+    //  System.out.printf("Node: %s, dist: %.2f, paths: %d\n", node, distTo.get(node), pathCount.get(node));
+    //}
 
     if (goal == null) {
       return;
@@ -243,7 +243,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
   private void pathTo(String goal) {
     List<String> path = new ArrayList<>();
     path.add(goal);
-    System.out.printf("goal: %s\n", goal);
+    //System.out.printf("goal: %s\n", goal);
 
     List<String> current;
     for (current = edgeTo.get(goal); current.size() == 1; current = edgeTo.get(current.get(0))) {
@@ -259,8 +259,8 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     Collections.reverse(path1);
     Collections.reverse(path2);
 
-    printList(path1);
-    printList(path2);
+    //printList(path1);
+    //printList(path2);
     
     if (path1.hashCode() < path2.hashCode()) {
       this.lesser = path1;
@@ -283,10 +283,10 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
     return path;
   }
 
-  private void printList(List<String> path) {
+  /*private void printList(List<String> path) {
     for (String element : path) {
       System.out.printf("%s, ", element);
     }
     System.out.println();
-  }
+  }*/
 }

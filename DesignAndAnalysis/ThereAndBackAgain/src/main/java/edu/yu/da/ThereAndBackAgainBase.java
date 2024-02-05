@@ -1,4 +1,4 @@
-package edu.yu.da.ThereAndBackAgain;
+package edu.yu.da;
 
 /** Defines the API for specifying and solving the ThereAndBackAgain problem
  * (see the requirements document).
