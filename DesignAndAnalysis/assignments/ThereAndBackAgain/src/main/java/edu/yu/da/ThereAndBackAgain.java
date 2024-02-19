@@ -27,7 +27,7 @@ public class ThereAndBackAgain extends ThereAndBackAgainBase {
 
       @Override
       public int compareTo(Edge otherEdge) {
-        return Double.compare(this.dist, otherEdge.dist);
+        return Double.compare(this.weight, otherEdge.weight);
       }
       
 
