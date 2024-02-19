@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.Stack;
 
 public class WaterPressure extends WaterPressureBase {
@@ -125,8 +123,11 @@ public class WaterPressure extends WaterPressureBase {
     //remember an input pump by definition receives water so there can be a blockage between 
     public void addSecondInputPump(String secondInputPump) {
         validate(secondInputPump);
-        if (!this.dag.containsKey(secondInputPump)) {
+        if (!this.pumps.contains(secondInputPump) || this.inputPumps.contains(secondInputPump)) {
             throw new IllegalArgumentException();
+        }
+        if (this.inputPumps.size()>1) {
+            return;
         }
 
         this.inputPumps.add(secondInputPump);
@@ -135,7 +136,7 @@ public class WaterPressure extends WaterPressureBase {
     // Maybe use binary search to add
     // whit is min if not connected - retrun -1.0;
     public void addBlockage(String v, String w, double blockage) {
-        if (this.minAmount == Double.MIN_VALUE) {
+        if (this.minAmount != Double.MIN_VALUE) {
             throw new IllegalStateException();
         }
         validate(v);
@@ -143,12 +144,13 @@ public class WaterPressure extends WaterPressureBase {
         validate(blockage);
 
         Channel channel = new Channel(v, w, blockage);
+        this.dag.computeIfAbsent(v, k -> new ArrayList<Channel>());
 
         if (v.equals(w) || dag.get(v).contains(channel)) {
             throw new IllegalArgumentException();
         }
 
-        this.dag.computeIfAbsent(v, k -> new ArrayList<Channel>()).add(channel);
+        this.dag.get(v).add(channel);
         this.channels.add(channel);
         this.pumps.add(v);
         this.pumps.add(w);
@@ -159,6 +161,7 @@ public class WaterPressure extends WaterPressureBase {
         // TODO Auto-generated method stub
 
         solve();
+        System.out.printf("FMin: %.2f", minAmount);
         return this.minAmount;
     }
     
@@ -174,6 +177,7 @@ public class WaterPressure extends WaterPressureBase {
         UnionFind uf = new UnionFind(this.pumps);
 
         for (int i=0; i< channels.size() && mst.size() < this.pumps.size()-1; i++) {
+            //System.out.println("gggg");
             Channel channel = this.channels.get(i);
             String start = channel.start;
             String dest = channel.dest;
@@ -184,6 +188,7 @@ public class WaterPressure extends WaterPressureBase {
                 uf.union(start, dest);     // merge v and w components
                 mst.add(channel); // add edge e to mst
                 this.minAmount = channel.blockage;
+                //System.out.printf("Min: %.2f", minAmount);
             }
             // else: it is not part of MST
         }
@@ -192,12 +197,19 @@ public class WaterPressure extends WaterPressureBase {
     }
 
     private void check(UnionFind uf) {
+        boolean connected;
         for (String pump: this.pumps) {
+            connected = false;
             for (String inputPump: this.inputPumps) {
-                if (!uf.isConnected(pump, inputPump)) {
-                    this.minAmount = -1.0;
-                }
+                if (uf.isConnected(pump, inputPump)) connected = true;
             }
+            //if (!connected) System.out.printf("Pump: %s", pump);
+            if (!connected) this.minAmount = -1.0;
+        }
+        //System.out.printf("Mxcin: %.2f", minAmount);
+       
+        if (this.channels.isEmpty()) {
+            this.minAmount = 0.0;
         }
     }
 
