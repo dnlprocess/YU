@@ -105,6 +105,7 @@ public class WaterPressure extends WaterPressureBase {
 
     public WaterPressure(String initialInputPump) {
         super(initialInputPump);
+        System.out.println("NEW----");
         this.minAmount = Double.MIN_VALUE;
         
         this.dag = new HashMap<>();
@@ -184,7 +185,13 @@ public class WaterPressure extends WaterPressureBase {
 
             if (inputPumps.contains(dest)) continue;
 
-            if (!uf.isConnected(start, dest)) {
+            System.out.printf("Start: %s, dest: %s, Parentu: %s, Parentw: %s\n", start, dest, uf.find(start), uf.find(dest));
+            boolean connected = false;
+            for (String inputPump: this.inputPumps) {
+                if (uf.isConnected(inputPump, dest) || uf.isConnected(start, dest)) connected = true;
+            }
+            if (!connected) {
+                //System.out.printf("Source: %s, dest: %s, connected: %b, blockage: %.2f\n", start, dest, uf.isConnected(start, dest), channel.blockage);
                 uf.union(start, dest);     // merge v and w components
                 mst.add(channel); // add edge e to mst
                 this.minAmount = channel.blockage;
