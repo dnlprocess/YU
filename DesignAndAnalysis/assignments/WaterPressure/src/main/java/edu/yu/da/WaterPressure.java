@@ -161,7 +161,7 @@ public class WaterPressure extends WaterPressureBase {
         // TODO Auto-generated method stub
 
         solve();
-        System.out.printf("FMin: %.2f", minAmount);
+        //System.out.printf("FMin: %.2f", minAmount);
         return this.minAmount;
     }
     
